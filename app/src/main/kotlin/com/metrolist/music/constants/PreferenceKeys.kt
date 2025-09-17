@@ -267,6 +267,7 @@ enum class PlayerBackgroundStyle {
     DEFAULT,
     GRADIENT,
     BLUR,
+    STARRY,
 }
 
 val TopSize = stringPreferencesKey("topSize")

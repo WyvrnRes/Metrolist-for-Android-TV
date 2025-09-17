@@ -97,6 +97,7 @@ import com.metrolist.music.models.MediaMetadata
 import com.metrolist.music.ui.component.Lyrics
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.PlayerSliderTrack
+import com.metrolist.music.ui.component.StarryBackground
 import com.metrolist.music.ui.component.BigSeekBar
 import androidx.navigation.NavController
 import me.saket.squiggles.SquigglySlider
@@ -246,12 +247,14 @@ fun LyricsScreen(
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
         PlayerBackgroundStyle.BLUR -> Color.White
         PlayerBackgroundStyle.GRADIENT -> Color.White
+        PlayerBackgroundStyle.STARRY -> Color.White
     }
 
     val icBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.surface
         PlayerBackgroundStyle.BLUR -> Color.Black
         PlayerBackgroundStyle.GRADIENT -> Color.Black
+        PlayerBackgroundStyle.STARRY -> Color.Black
     }
 
     LaunchedEffect(playbackState) {
@@ -323,9 +326,18 @@ fun LyricsScreen(
                     }
                 }
             }
+
+            // Starry background
+            if (playerBackground == PlayerBackgroundStyle.STARRY) {
+                StarryBackground(
+                    modifier = Modifier.fillMaxSize(),
+                    backgroundColor = if (useDarkTheme) Color.Black else Color(0xFF0D1B2A),
+                    starColor = Color.White
+                )
+            }
         }
 
-        if (playerBackground != PlayerBackgroundStyle.DEFAULT) {
+        if (playerBackground != PlayerBackgroundStyle.DEFAULT && playerBackground != PlayerBackgroundStyle.STARRY) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
