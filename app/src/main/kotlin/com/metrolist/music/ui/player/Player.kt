@@ -133,6 +133,7 @@ import com.metrolist.music.ui.component.LocalBottomSheetPageState
 import com.metrolist.music.ui.component.LocalMenuState
 import com.metrolist.music.ui.component.PlayerSliderTrack
 import com.metrolist.music.ui.component.ResizableIconButton
+import com.metrolist.music.ui.component.StarryBackground
 import com.metrolist.music.ui.component.rememberBottomSheetState
 import com.metrolist.music.ui.menu.PlayerMenu
 import com.metrolist.music.ui.screens.settings.DarkMode
@@ -333,6 +334,7 @@ fun BottomSheetPlayer(
             PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
             PlayerBackgroundStyle.BLUR -> Color.White
             PlayerBackgroundStyle.GRADIENT -> Color.White
+            PlayerBackgroundStyle.STARRY -> Color.White
         }
 
     val icBackgroundColor =
@@ -340,6 +342,7 @@ fun BottomSheetPlayer(
             PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.surface
             PlayerBackgroundStyle.BLUR -> Color.Black
             PlayerBackgroundStyle.GRADIENT -> Color.Black
+            PlayerBackgroundStyle.STARRY -> Color.Black
         }
 
     val (textButtonColor, iconButtonColor) = when (playerButtonsStyle) {
@@ -1139,6 +1142,15 @@ fun BottomSheetPlayer(
                         Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)))
                     }
                 }
+            }
+
+            // Starry background
+            if (playerBackground == PlayerBackgroundStyle.STARRY) {
+                StarryBackground(
+                    modifier = Modifier.fillMaxSize(),
+                    backgroundColor = if (useDarkTheme) Color.Black else Color(0xFF0D1B2A),
+                    starColor = Color.White
+                )
             }
         }
 
