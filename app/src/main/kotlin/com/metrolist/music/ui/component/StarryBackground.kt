@@ -38,7 +38,7 @@ data class Star(
 @Composable
 fun StarryBackground(
     modifier: Modifier = Modifier,
-    starCount: Int = 150,
+    starCount: Int = 300,
     backgroundColor: Color = Color.Black,
     starColor: Color = Color.White
 ) {
@@ -50,8 +50,8 @@ fun StarryBackground(
         initialValue = 0f,
         targetValue = 2 * PI.toFloat(),
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 4000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            animation = tween(durationMillis = 3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
         ),
         label = "twinkle"
     )
@@ -62,7 +62,7 @@ fun StarryBackground(
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 20000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
+            repeatMode = RepeatMode.Reverse
         ),
         label = "time"
     )
@@ -131,7 +131,7 @@ private fun generateStars(count: Int): List<Star> {
         Star(
             x = random.nextFloat(),
             y = random.nextFloat(),
-            size = random.nextFloat() * 3f + 1f, // Size between 1-4
+            size = random.nextFloat() * 7f + 1f, // Size between 1-8
             baseAlpha = random.nextFloat() * 0.6f + 0.4f, // Alpha between 0.4-1.0
             twinkleSpeed = random.nextFloat() * 0.8f + 0.4f, // Speed variation
             rotation = random.nextFloat() * 360f,
