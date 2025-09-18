@@ -15,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -35,10 +36,19 @@ data class Star(
     val isPoint: Boolean // Some stars are points, others are crosses
 )
 
+data class ShootingStar(
+    val startX: Float,
+    val startY: Float,
+    val endX: Float,
+    val endY: Float,
+    val duration: Long,
+    val delay: Long
+)
+
 @Composable
 fun StarryBackground(
     modifier: Modifier = Modifier,
-    starCount: Int = 300,
+    starCount: Int = 235,
     backgroundColor: Color = Color.Black,
     starColor: Color = Color.White
 ) {
@@ -55,20 +65,34 @@ fun StarryBackground(
         ),
         label = "twinkle"
     )
-    
-    // Animation for shooting stars (optional subtle movement)
+
     val timeAnimation by infiniteTransition.animateFloat(
         initialValue = 0f,
         targetValue = 1f,
         animationSpec = infiniteRepeatable(
             animation = tween(durationMillis = 20000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
+            repeatMode = RepeatMode.Restart
         ),
         label = "time"
     )
 
+    // Shooting star animation
+    val shootingStarTime by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 10000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "shooting_stars"
+    )
+
     val stars = remember {
         generateStars(starCount)
+    }
+
+    val shootingStars = remember {
+        generateShootingStars()
     }
 
     Canvas(
@@ -95,14 +119,14 @@ fun StarryBackground(
             val starX = star.x * size.width
             val starY = star.y * size.height
             val currentTime = twinkleAnimation * star.twinkleSpeed
-            
+
             // Calculate twinkling alpha
             val twinkleAlpha = (sin(currentTime) * 0.3f + 0.7f).coerceIn(0.2f, 1f)
             val alpha = (star.baseAlpha * twinkleAlpha).coerceIn(0f, 1f)
-            
+
             val currentStarColor = starColor.copy(alpha = alpha)
             val starSize = star.size * (1f + sin(currentTime * 1.2f) * 0.1f)
-            
+
             if (star.isPoint) {
                 // Draw circular star
                 drawCircle(
@@ -121,12 +145,20 @@ fun StarryBackground(
                 }
             }
         }
+
+        // Draw shooting stars
+        drawShootingStars(
+            shootingStars = shootingStars,
+            animationProgress = shootingStarTime,
+            canvasSize = size,
+            starColor = starColor
+        )
     }
 }
 
 private fun generateStars(count: Int): List<Star> {
     val random = Random(42) // Fixed seed for consistent star positions
-    
+
     return (0 until count).map {
         Star(
             x = random.nextFloat(),
@@ -137,6 +169,102 @@ private fun generateStars(count: Int): List<Star> {
             rotation = random.nextFloat() * 360f,
             isPoint = random.nextFloat() > 0.3f // 70% are points, 30% are crosses
         )
+    }
+}
+
+private fun generateShootingStars(): List<ShootingStar> {
+    val random = Random(123) // Different seed for variety
+    return (0 until 4).map { index ->
+        val startX = random.nextFloat() * 0.3f + 0.7f // Start from right side
+        val startY = random.nextFloat() * 0.5f // Top half
+        val endX = startX - (random.nextFloat() * 0.5f + 0.4f) // Move left
+        val endY = startY + (random.nextFloat() * 0.4f + 0.3f) // Move down
+
+        ShootingStar(
+            startX = startX,
+            startY = startY,
+            endX = endX,
+            endY = endY,
+            duration = random.nextLong(1500, 3000),
+            delay = index * 2000L + random.nextLong(0, 1000) // Stagger the shooting stars
+        )
+    }
+}
+
+private fun DrawScope.drawShootingStars(
+    shootingStars: List<ShootingStar>,
+    animationProgress: Float,
+    canvasSize: Size,
+    starColor: Color
+) {
+    val currentTime = (animationProgress * 10000).toLong()
+
+    shootingStars.forEach { shootingStar ->
+        val starStartTime = shootingStar.delay
+        val starEndTime = starStartTime + shootingStar.duration
+
+        if (currentTime >= starStartTime && currentTime <= starEndTime) {
+            val progress = ((currentTime - starStartTime).toFloat() / shootingStar.duration.toFloat())
+                .coerceIn(0f, 1f)
+
+            // Calculate current position
+            val currentX = shootingStar.startX + (shootingStar.endX - shootingStar.startX) * progress
+            val currentY = shootingStar.startY + (shootingStar.endY - shootingStar.startY) * progress
+
+            val x = currentX * canvasSize.width
+            val y = currentY * canvasSize.height
+
+            // Calculate alpha with fade in/out effect
+            val alpha = when {
+                progress < 0.2f -> progress / 0.2f // Fade in
+                progress > 0.8f -> (1f - progress) / 0.2f // Fade out
+                else -> 1f // Full brightness
+            }.coerceIn(0f, 1f)
+
+            // Draw shooting star trail
+            val trailLength = 80f
+            val direction = Offset(
+                shootingStar.endX - shootingStar.startX,
+                shootingStar.endY - shootingStar.startY
+            )
+            val trailStart = Offset(
+                x - direction.x * canvasSize.width * 0.15f,
+                y - direction.y * canvasSize.height * 0.15f
+            )
+
+            // Draw trail with gradient
+            val gradient = Brush.linearGradient(
+                colors = listOf(
+                    starColor.copy(alpha = 0f),
+                    starColor.copy(alpha = alpha * 0.4f),
+                    starColor.copy(alpha = alpha * 0.8f),
+                    starColor.copy(alpha = alpha)
+                ),
+                start = trailStart,
+                end = Offset(x, y)
+            )
+
+            drawLine(
+                brush = gradient,
+                start = trailStart,
+                end = Offset(x, y),
+                strokeWidth = 3f
+            )
+
+            // Draw bright head
+            drawCircle(
+                color = starColor.copy(alpha = alpha),
+                radius = 4f,
+                center = Offset(x, y)
+            )
+
+            // Draw bright glow around the head
+            drawCircle(
+                color = starColor.copy(alpha = alpha * 0.3f),
+                radius = 8f,
+                center = Offset(x, y)
+            )
+        }
     }
 }
 
