@@ -22,16 +22,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Switch
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,9 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.room.util.copy
 import com.metrolist.music.LocalDatabase
-import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
 import com.metrolist.music.db.entities.LyricsEntity
 import com.metrolist.music.db.entities.SongEntity
@@ -183,10 +181,14 @@ fun LyricsMenu(
                             searchMediaMetadata.duration
                         )
                         showSearchResultDialog = true
-                        
+
                         // Show warning only if network is definitely unavailable
                         if (!isNetworkAvailable) {
-                            Toast.makeText(context, context.getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.error_no_internet),
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     },
                 ) {
@@ -226,22 +228,22 @@ fun LyricsMenu(
             itemsIndexed(results) { index, result ->
                 Row(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            onDismiss()
-                            viewModel.cancelSearch()
-                            database.query {
-                                upsert(
-                                    LyricsEntity(
-                                        id = searchMediaMetadata.id,
-                                        lyrics = result.lyrics,
-                                    ),
-                                )
+                        Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                onDismiss()
+                                viewModel.cancelSearch()
+                                database.query {
+                                    upsert(
+                                        LyricsEntity(
+                                            id = searchMediaMetadata.id,
+                                            lyrics = result.lyrics,
+                                        ),
+                                    )
+                                }
                             }
-                        }
-                        .padding(12.dp)
-                        .animateContentSize(),
+                            .padding(12.dp)
+                            .animateContentSize(),
                 ) {
                     Column(
                         modifier = Modifier.weight(1f),
@@ -269,9 +271,9 @@ fun LyricsMenu(
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.secondary,
                                     modifier =
-                                    Modifier
-                                        .padding(start = 4.dp)
-                                        .size(18.dp),
+                                        Modifier
+                                            .padding(start = 4.dp)
+                                            .size(18.dp),
                                 )
                             }
                         }
@@ -307,8 +309,8 @@ fun LyricsMenu(
                         text = context.getString(R.string.lyrics_not_found),
                         textAlign = TextAlign.Center,
                         modifier =
-                        Modifier
-                            .fillMaxWidth(),
+                            Modifier
+                                .fillMaxWidth(),
                     )
                 }
             }

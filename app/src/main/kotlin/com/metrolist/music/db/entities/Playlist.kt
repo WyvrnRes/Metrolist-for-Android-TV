@@ -16,11 +16,11 @@ data class Playlist(
         parentColumn = "id",
         projection = ["thumbnailUrl"],
         associateBy =
-        Junction(
-            value = PlaylistSongMapPreview::class,
-            parentColumn = "playlistId",
-            entityColumn = "songId",
-        ),
+            Junction(
+                value = PlaylistSongMapPreview::class,
+                parentColumn = "playlistId",
+                entityColumn = "songId",
+            ),
     )
     val songThumbnails: List<String?>,
 ) : LocalItem() {
@@ -30,7 +30,7 @@ data class Playlist(
         get() = playlist.name
     override val thumbnailUrl: String?
         get() = null
-    
+
     val thumbnails: List<String>
         get() {
             return if (playlist.thumbnailUrl != null)

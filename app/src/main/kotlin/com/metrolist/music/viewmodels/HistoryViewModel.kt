@@ -1,13 +1,12 @@
 package com.metrolist.music.viewmodels
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.metrolist.innertube.YouTube
 import com.metrolist.innertube.pages.HistoryPage
 import com.metrolist.music.constants.HistorySource
-import com.metrolist.music.utils.reportException
 import com.metrolist.music.db.MusicDatabase
+import com.metrolist.music.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

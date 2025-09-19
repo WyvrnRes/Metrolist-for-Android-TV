@@ -34,7 +34,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.metrolist.innertube.models.WatchEndpoint
 import com.metrolist.innertube.utils.parseCookieString
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalPlayerAwareWindowInsets
@@ -121,7 +119,7 @@ fun HistoryScreen(
     val historySource by viewModel.historySource.collectAsState()
 
     val historyPage by viewModel.historyPage.collectAsState()
-    
+
     val events by viewModel.events.collectAsState()
 
     val innerTubeCookie by rememberPreference(InnerTubeCookieKey, "")
@@ -210,7 +208,7 @@ fun HistoryScreen(
                     currentValue = historySource,
                     onValueUpdate = {
                         viewModel.historySource.value = it
-                        if (it == HistorySource.REMOTE){
+                        if (it == HistorySource.REMOTE) {
                             viewModel.fetchRemoteHistory()
                         }
                     }
@@ -298,7 +296,7 @@ fun HistoryScreen(
                     }
 
                     val currentDateWrappedItems = wrappedItemsMap[dateAgo] ?: emptyList()
-                    
+
                     itemsIndexed(
                         items = currentDateWrappedItems,
                         key = { index, wrappedItem -> "${dateAgo}_${wrappedItem.item.event.id}_$index" }

@@ -2,10 +2,8 @@ package com.metrolist.music
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -22,11 +20,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -34,9 +29,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
@@ -55,8 +51,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -64,9 +60,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -90,8 +86,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastFirstOrNull
@@ -101,8 +97,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.core.net.toUri
 import androidx.core.util.Consumer
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -112,6 +108,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import coil3.imageLoader
+import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.toBitmap
@@ -124,9 +121,8 @@ import com.metrolist.music.constants.DarkModeKey
 import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DisableScreenshotKey
 import com.metrolist.music.constants.DynamicThemeKey
-import com.metrolist.music.constants.MiniPlayerHeight
 import com.metrolist.music.constants.MiniPlayerBottomSpacing
-import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
+import com.metrolist.music.constants.MiniPlayerHeight
 import com.metrolist.music.constants.NavigationBarAnimationSpec
 import com.metrolist.music.constants.NavigationBarHeight
 import com.metrolist.music.constants.PauseSearchHistoryKey
@@ -136,7 +132,9 @@ import com.metrolist.music.constants.SearchSource
 import com.metrolist.music.constants.SearchSourceKey
 import com.metrolist.music.constants.SlimNavBarHeight
 import com.metrolist.music.constants.SlimNavBarKey
+import com.metrolist.music.constants.StarryBackgroundKey
 import com.metrolist.music.constants.StopMusicOnTaskClearKey
+import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
 import com.metrolist.music.db.MusicDatabase
 import com.metrolist.music.db.entities.SearchHistory
 import com.metrolist.music.extensions.toEnum
@@ -211,7 +209,6 @@ class MainActivity : ComponentActivity() {
     private var latestVersionName by mutableStateOf(BuildConfig.VERSION_NAME)
 
     private var playerConnection by mutableStateOf<PlayerConnection?>(null)
-    
     private val serviceConnection =
         object : ServiceConnection {
             override fun onServiceConnected(
@@ -236,7 +233,7 @@ class MainActivity : ComponentActivity() {
         bindService(
             Intent(this, MusicService::class.java),
             serviceConnection,
-            Context.BIND_AUTO_CREATE
+            BIND_AUTO_CREATE
         )
     }
 
@@ -281,7 +278,7 @@ class MainActivity : ComponentActivity() {
                 ?: Locale.getDefault()
             setAppLocale(this, locale)
         }
-        
+
         lifecycleScope.launch {
             dataStore.data
                 .map { it[DisableScreenshotKey] ?: false }
@@ -322,6 +319,8 @@ class MainActivity : ComponentActivity() {
             val pureBlackEnabled by rememberPreference(PureBlackKey, defaultValue = false)
             val pureBlack = pureBlackEnabled && useDarkTheme
 
+            val useStarryBackground by rememberPreference(StarryBackgroundKey, defaultValue = false)
+
             var themeColor by rememberSaveable(stateSaver = ColorSaver) {
                 mutableStateOf(DefaultThemeColor)
             }
@@ -342,9 +341,9 @@ class MainActivity : ComponentActivity() {
                                             .Builder(this@MainActivity)
                                             .data(song.thumbnailUrl)
                                             .allowHardware(false) // pixel access is not supported on Config#HARDWARE bitmaps
-                                            .memoryCachePolicy(coil3.request.CachePolicy.ENABLED)
-                                            .diskCachePolicy(coil3.request.CachePolicy.ENABLED)
-                                            .networkCachePolicy(coil3.request.CachePolicy.ENABLED)
+                                            .memoryCachePolicy(CachePolicy.ENABLED)
+                                            .diskCachePolicy(CachePolicy.ENABLED)
+                                            .networkCachePolicy(CachePolicy.ENABLED)
                                             .build(),
                                     )
                                 result.image?.toBitmap()?.extractThemeColor()
@@ -360,20 +359,17 @@ class MainActivity : ComponentActivity() {
                 darkTheme = useDarkTheme,
                 pureBlack = pureBlack,
                 themeColor = themeColor,
+                useStarryBackground = useStarryBackground,
             ) {
-                BoxWithConstraints(
-                    modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(
-                            if (pureBlack) Color.Black else MaterialTheme.colorScheme.surface
-                        )
-                ) {
+
+                BoxWithConstraints() {
+
                     val focusManager = LocalFocusManager.current
                     val density = LocalDensity.current
                     val windowsInsets = WindowInsets.systemBars
                     val bottomInset = with(density) { windowsInsets.getBottom(density).toDp() }
-                    val bottomInsetDp = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
+                    val bottomInsetDp =
+                        WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
                     val navController = rememberNavController()
                     val homeViewModel: HomeViewModel = hiltViewModel()
@@ -383,7 +379,10 @@ class MainActivity : ComponentActivity() {
 
                     val navigationItems = remember { Screens.MainScreens }
                     val (slimNav) = rememberPreference(SlimNavBarKey, defaultValue = false)
-                    val (useNewMiniPlayerDesign) = rememberPreference(UseNewMiniPlayerDesignKey, defaultValue = true)
+                    val (useNewMiniPlayerDesign) = rememberPreference(
+                        UseNewMiniPlayerDesignKey,
+                        defaultValue = true
+                    )
                     val defaultOpenTab =
                         remember {
                             dataStore[DefaultOpenTabKey].toEnum(defaultValue = NavigationTab.HOME)
@@ -637,7 +636,9 @@ class MainActivity : ComponentActivity() {
 
                     CompositionLocalProvider(
                         LocalDatabase provides database,
-                        LocalContentColor provides if (pureBlack) Color.White else contentColorFor(MaterialTheme.colorScheme.surface),
+                        LocalContentColor provides if (pureBlack) Color.White else contentColorFor(
+                            MaterialTheme.colorScheme.surface
+                        ),
                         LocalPlayerConnection provides playerConnection,
                         LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
                         LocalDownloadUtil provides downloadUtil,
@@ -693,7 +694,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                         },
                                         scrollBehavior =
-                                        searchBarScrollBehavior,
+                                            searchBarScrollBehavior,
                                         colors = TopAppBarDefaults.topAppBarColors(
                                             containerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer,
                                             scrolledContainerColor = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer,
@@ -704,7 +705,9 @@ class MainActivity : ComponentActivity() {
                                     )
                                 }
                                 AnimatedVisibility(
-                                    visible = active || navBackStackEntry?.destination?.route?.startsWith("search/") == true,
+                                    visible = active || navBackStackEntry?.destination?.route?.startsWith(
+                                        "search/"
+                                    ) == true,
                                     enter = fadeIn(animationSpec = tween(durationMillis = 300)),
                                     exit = fadeOut(animationSpec = tween(durationMillis = 200))
                                 ) {
@@ -742,6 +745,7 @@ class MainActivity : ComponentActivity() {
                                                         !navigationItems.fastAny { it.route == navBackStackEntry?.destination?.route } -> {
                                                             navController.backToMain()
                                                         }
+
                                                         else -> {}
                                                     }
                                                 },
@@ -770,7 +774,7 @@ class MainActivity : ComponentActivity() {
                                                                     TextFieldValue(
                                                                         ""
                                                                     )
-                                                               )
+                                                                )
                                                             },
                                                         ) {
                                                             Icon(
@@ -799,9 +803,9 @@ class MainActivity : ComponentActivity() {
                                             }
                                         },
                                         modifier =
-                                        Modifier
-                                            .focusRequester(searchBarFocusRequester)
-                                            .align(Alignment.TopCenter),
+                                            Modifier
+                                                .focusRequester(searchBarFocusRequester)
+                                                .align(Alignment.TopCenter),
                                         focusRequester = searchBarFocusRequester,
                                         colors = if (pureBlack && active) {
                                             SearchBarDefaults.colors(
@@ -827,10 +831,10 @@ class MainActivity : ComponentActivity() {
                                             targetState = searchSource,
                                             label = "",
                                             modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .padding(bottom = if (!playerBottomSheetState.isDismissed) MiniPlayerHeight else 0.dp)
-                                                .navigationBarsPadding(),
+                                                Modifier
+                                                    .fillMaxSize()
+                                                    .padding(bottom = if (!playerBottomSheetState.isDismissed) MiniPlayerHeight else 0.dp)
+                                                    .navigationBarsPadding(),
                                         ) { searchSource ->
                                             when (searchSource) {
                                                 SearchSource.LOCAL ->
@@ -864,8 +868,8 @@ class MainActivity : ComponentActivity() {
                                                         onDismiss = { onActiveChange(false) },
                                                         pureBlack = pureBlack
                                                     )
-                                           }
-                                       }
+                                            }
+                                        }
                                     }
                                 }
                             },
@@ -874,7 +878,8 @@ class MainActivity : ComponentActivity() {
                                     BottomSheetPlayer(
                                         state = playerBottomSheetState,
                                         navController = navController,
-                                        pureBlack = pureBlack
+                                        pureBlack = pureBlack,
+                                        useStarryBackground = useStarryBackground,
                                     )
                                     NavigationBar(
                                         modifier = Modifier
@@ -931,7 +936,10 @@ class MainActivity : ComponentActivity() {
                                                     if (screen.route == Screens.Search.route) {
                                                         onActiveChange(true)
                                                     } else if (isSelected) {
-                                                        navController.currentBackStackEntry?.savedStateHandle?.set("scrollToTop", true)
+                                                        navController.currentBackStackEntry?.savedStateHandle?.set(
+                                                            "scrollToTop",
+                                                            true
+                                                        )
                                                         coroutineScope.launch {
                                                             searchBarScrollBehavior.state.resetHeightOffset()
                                                         }
@@ -948,8 +956,10 @@ class MainActivity : ComponentActivity() {
                                             )
                                         }
                                     }
-                                    val baseBg = if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
-                                    val insetBg = if (playerBottomSheetState.progress > 0f) Color.Transparent else baseBg
+                                    val baseBg =
+                                        if (pureBlack) Color.Black else MaterialTheme.colorScheme.surfaceContainer
+                                    val insetBg =
+                                        if (playerBottomSheetState.progress > 0f) Color.Transparent else baseBg
 
                                     Box(
                                         modifier = Modifier
@@ -1010,14 +1020,20 @@ class MainActivity : ComponentActivity() {
                                     }
                                 },
                                 popEnterTransition = {
-                                    if ((initialState.destination.route in topLevelScreens || initialState.destination.route?.startsWith("search/") == true) && targetState.destination.route in topLevelScreens) {
+                                    if ((initialState.destination.route in topLevelScreens || initialState.destination.route?.startsWith(
+                                            "search/"
+                                        ) == true) && targetState.destination.route in topLevelScreens
+                                    ) {
                                         fadeIn(tween(250))
                                     } else {
                                         fadeIn(tween(250)) + slideInHorizontally { -it / 2 }
                                     }
                                 },
                                 popExitTransition = {
-                                    if ((initialState.destination.route in topLevelScreens || initialState.destination.route?.startsWith("search/") == true) && targetState.destination.route in topLevelScreens) {
+                                    if ((initialState.destination.route in topLevelScreens || initialState.destination.route?.startsWith(
+                                            "search/"
+                                        ) == true) && targetState.destination.route in topLevelScreens
+                                    ) {
                                         fadeOut(tween(200))
                                     } else {
                                         fadeOut(tween(200)) + slideOutHorizontally { it / 2 }
@@ -1135,7 +1151,7 @@ class MainActivity : ComponentActivity() {
                     uri.host == "youtu.be" -> uri.pathSegments.firstOrNull()
                     else -> null
                 }
-                
+
                 val playlistId = uri.getQueryParameter("list")
 
                 videoId?.let {
@@ -1145,7 +1161,10 @@ class MainActivity : ComponentActivity() {
                         }.onSuccess {
                             playerConnection?.playQueue(
                                 YouTubeQueue(
-                                    WatchEndpoint(videoId = it.firstOrNull()?.id, playlistId = playlistId),
+                                    WatchEndpoint(
+                                        videoId = it.firstOrNull()?.id,
+                                        playlistId = playlistId
+                                    ),
                                     it.firstOrNull()?.toMediaMetadata()
                                 )
                             )

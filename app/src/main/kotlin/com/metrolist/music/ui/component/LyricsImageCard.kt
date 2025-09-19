@@ -4,10 +4,25 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,7 +37,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -132,9 +152,11 @@ fun LyricsImageCard(
     val padding = 28.dp
     val coverArtSize = 64.dp
 
-    val backgroundGradient = backgroundColor ?: if (darkBackground) Color(0xFF121212) else Color(0xFFF5F5F5)
+    val backgroundGradient =
+        backgroundColor ?: if (darkBackground) Color(0xFF121212) else Color(0xFFF5F5F5)
     val mainTextColor = textColor ?: if (darkBackground) Color.White else Color.Black
-    val secondaryColor = secondaryTextColor ?: if (darkBackground) Color.White.copy(alpha = 0.7f) else Color.Black.copy(alpha = 0.7f)
+    val secondaryColor = secondaryTextColor
+        ?: if (darkBackground) Color.White.copy(alpha = 0.7f) else Color.Black.copy(alpha = 0.7f)
 
     val painter = rememberAsyncImagePainter(
         ImageRequest.Builder(context)
@@ -154,7 +176,11 @@ fun LyricsImageCard(
                 .size(cardSizeDp)
                 .clip(RoundedCornerShape(cardCornerRadius))
                 .background(backgroundGradient)
-                .border(1.dp, mainTextColor.copy(alpha = 0.09f), RoundedCornerShape(cardCornerRadius)),
+                .border(
+                    1.dp,
+                    mainTextColor.copy(alpha = 0.09f),
+                    RoundedCornerShape(cardCornerRadius)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -177,7 +203,11 @@ fun LyricsImageCard(
                         modifier = Modifier
                             .size(coverArtSize)
                             .clip(RoundedCornerShape(12.dp))
-                            .border(1.dp, mainTextColor.copy(alpha = 0.16f), RoundedCornerShape(12.dp))
+                            .border(
+                                1.dp,
+                                mainTextColor.copy(alpha = 0.16f),
+                                RoundedCornerShape(12.dp)
+                            )
                     )
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(
@@ -268,7 +298,9 @@ fun LyricsImageCard(
                             contentDescription = null,
                             modifier = Modifier
                                 .size(16.dp),
-                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(backgroundGradient) // الرمز بلون الخلفية
+                            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(
+                                backgroundGradient
+                            ) // الرمز بلون الخلفية
                         )
                     }
 

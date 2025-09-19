@@ -107,7 +107,7 @@ class BackupRestoreViewModel @Inject constructor(
                     val artistStr = parts[1]
 
                     val artists = artistStr.split(";").map { it.trim() }.map {
-                   ArtistEntity(
+                        ArtistEntity(
                             id = "",
                             name = it,
                         )
@@ -148,8 +148,10 @@ class BackupRestoreViewModel @Inject constructor(
                         if (rawLine.startsWith("#EXTINF:")) {
                             // maybe later write this to be more efficient
                             val artists =
-                                rawLine.substringAfter("#EXTINF:").substringAfter(',').substringBefore(" - ").split(';')
-                            val title = rawLine.substringAfter("#EXTINF:").substringAfter(',').substringAfter(" - ")
+                                rawLine.substringAfter("#EXTINF:").substringAfter(',')
+                                    .substringBefore(" - ").split(';')
+                            val title = rawLine.substringAfter("#EXTINF:").substringAfter(',')
+                                .substringAfter(" - ")
 
                             val mockSong = Song(
                                 song = SongEntity(

@@ -19,60 +19,60 @@ fun Modifier.fadingEdge(
         if (top != null) {
             drawRect(
                 brush =
-                Brush.verticalGradient(
-                    colors =
-                    listOf(
-                        Color.Transparent,
-                        Color.Black,
+                    Brush.verticalGradient(
+                        colors =
+                            listOf(
+                                Color.Transparent,
+                                Color.Black,
+                            ),
+                        startY = 0f,
+                        endY = top.toPx(),
                     ),
-                    startY = 0f,
-                    endY = top.toPx(),
-                ),
                 blendMode = BlendMode.DstIn,
             )
         }
         if (bottom != null) {
             drawRect(
                 brush =
-                Brush.verticalGradient(
-                    colors =
-                    listOf(
-                        Color.Black,
-                        Color.Transparent,
+                    Brush.verticalGradient(
+                        colors =
+                            listOf(
+                                Color.Black,
+                                Color.Transparent,
+                            ),
+                        startY = size.height - bottom.toPx(),
+                        endY = size.height,
                     ),
-                    startY = size.height - bottom.toPx(),
-                    endY = size.height,
-                ),
                 blendMode = BlendMode.DstIn,
             )
         }
         if (left != null) {
             drawRect(
                 brush =
-                Brush.horizontalGradient(
-                    colors =
-                    listOf(
-                        Color.Black,
-                        Color.Transparent,
+                    Brush.horizontalGradient(
+                        colors =
+                            listOf(
+                                Color.Black,
+                                Color.Transparent,
+                            ),
+                        startX = 0f,
+                        endX = left.toPx(),
                     ),
-                    startX = 0f,
-                    endX = left.toPx(),
-                ),
                 blendMode = BlendMode.DstIn,
             )
         }
         if (right != null) {
             drawRect(
                 brush =
-                Brush.horizontalGradient(
-                    colors =
-                    listOf(
-                        Color.Transparent,
-                        Color.Black,
+                    Brush.horizontalGradient(
+                        colors =
+                            listOf(
+                                Color.Transparent,
+                                Color.Black,
+                            ),
+                        startX = size.width - right.toPx(),
+                        endX = size.width,
                     ),
-                    startX = size.width - right.toPx(),
-                    endX = size.width,
-                ),
                 blendMode = BlendMode.DstIn,
             )
         }

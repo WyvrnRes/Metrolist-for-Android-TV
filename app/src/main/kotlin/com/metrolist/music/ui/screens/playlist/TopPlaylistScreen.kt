@@ -44,7 +44,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -130,13 +129,13 @@ fun TopPlaylistScreen(
     var isSearching by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf(TextFieldValue()) }
     val focusRequester = remember { FocusRequester() }
-    
+
     LaunchedEffect(isSearching) {
         if (isSearching) {
             focusRequester.requestFocus()
         }
     }
-    
+
     var selection by remember { mutableStateOf(false) }
 
     if (isSearching) {
@@ -222,7 +221,7 @@ fun TopPlaylistScreen(
         else wrappedSongs?.filter { wrapper ->
             val song = wrapper.item
             song.song.title.contains(query.text, true) ||
-                song.artists.any { it.name.contains(query.text, true) }
+                    song.artists.any { it.name.contains(query.text, true) }
         }
     }
 
@@ -540,6 +539,7 @@ fun TopPlaylistScreen(
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
+
                     isSearching -> {
                         TextField(
                             value = query,
@@ -565,6 +565,7 @@ fun TopPlaylistScreen(
                                 .focusRequester(focusRequester)
                         )
                     }
+
                     else -> {
                         Text(text = name)
                     }
@@ -579,9 +580,11 @@ fun TopPlaylistScreen(
                                 query = TextFieldValue()
                                 focusManager.clearFocus()
                             }
+
                             selection -> {
                                 selection = false
                             }
+
                             else -> {
                                 navController.navigateUp()
                             }

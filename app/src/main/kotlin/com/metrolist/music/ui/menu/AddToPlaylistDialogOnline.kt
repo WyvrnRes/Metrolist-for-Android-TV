@@ -120,14 +120,17 @@ fun AddToPlaylistDialogOnline(
                         coroutineScope.launch(Dispatchers.IO) {
                             onDismiss()
                             val songsTot = songs.count().toDouble()
-                            var  songsIdx = 0.toDouble()
+                            var songsIdx = 0.toDouble()
                             onProgressStart(true)
-                            songs.reversed().forEach{
-                                    song ->
+                            songs.reversed().forEach { song ->
                                 var allArtists = ""
-                                song.artists.forEach {
-                                        artist ->
-                                    allArtists += " ${URLDecoder.decode(artist.name, StandardCharsets.UTF_8.toString())}"
+                                song.artists.forEach { artist ->
+                                    allArtists += " ${
+                                        URLDecoder.decode(
+                                            artist.name,
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                    }"
                                 }
                                 val query = "${song.title} - $allArtists"
 
@@ -136,11 +139,14 @@ fun AddToPlaylistDialogOnline(
                                         YouTube.search(query, YouTube.SearchFilter.FILTER_SONG)
                                             .onSuccess { result ->
                                                 viewStateMap[YouTube.SearchFilter.FILTER_SONG.value] =
-                                                    ItemsPage(result.items.distinctBy { it.id }, result.continuation)
+                                                    ItemsPage(
+                                                        result.items.distinctBy { it.id },
+                                                        result.continuation
+                                                    )
                                                 val itemsPage = viewStateMap.entries.first().value!!
                                                 val firstSong = itemsPage.items[0] as SongItem
                                                 val firstSongMedia = firstSong.toMediaMetadata()
-                                                val ids = List(1) {firstSong.id}
+                                                val ids = List(1) { firstSong.id }
                                                 withContext(Dispatchers.IO) {
                                                     try {
                                                         database.insert(firstSongMedia)
@@ -163,7 +169,7 @@ fun AddToPlaylistDialogOnline(
                                         }
                                         onPercentageChange(((songsIdx / songsTot) * 100).toInt())
 
-                                    } catch (e: Exception){
+                                    } catch (e: Exception) {
                                         Timber.tag("ERROR").v(e.toString())
                                     }
 
@@ -182,14 +188,17 @@ fun AddToPlaylistDialogOnline(
                         coroutineScope.launch(Dispatchers.IO) {
                             onDismiss()
                             val songsTot = songs.count().toDouble()
-                            var  songsIdx = 0.toDouble()
+                            var songsIdx = 0.toDouble()
                             onProgressStart(true)
-                            songs.reversed().forEach{
-                                    song ->
+                            songs.reversed().forEach { song ->
                                 var allArtists = ""
-                                song.artists.forEach {
-                                        artist ->
-                                    allArtists += " ${URLDecoder.decode(artist.name, StandardCharsets.UTF_8.toString())}"
+                                song.artists.forEach { artist ->
+                                    allArtists += " ${
+                                        URLDecoder.decode(
+                                            artist.name,
+                                            StandardCharsets.UTF_8.toString()
+                                        )
+                                    }"
                                 }
                                 val query = "${song.title} - $allArtists"
 
@@ -198,11 +207,15 @@ fun AddToPlaylistDialogOnline(
                                         YouTube.search(query, YouTube.SearchFilter.FILTER_SONG)
                                             .onSuccess { result ->
                                                 viewStateMap[YouTube.SearchFilter.FILTER_SONG.value] =
-                                                    ItemsPage(result.items.distinctBy { it.id }, result.continuation)
+                                                    ItemsPage(
+                                                        result.items.distinctBy { it.id },
+                                                        result.continuation
+                                                    )
                                                 val itemsPage = viewStateMap.entries.first().value!!
                                                 val firstSong = itemsPage.items[0] as SongItem
                                                 val firstSongMedia = firstSong.toMediaMetadata()
-                                                val firstSongEnt = firstSong.toMediaMetadata().toSongEntity()
+                                                val firstSongEnt =
+                                                    firstSong.toMediaMetadata().toSongEntity()
                                                 withContext(Dispatchers.IO) {
                                                     try {
                                                         database.insert(firstSongMedia)
@@ -227,7 +240,7 @@ fun AddToPlaylistDialogOnline(
                                         }
                                         onPercentageChange(((songsIdx / songsTot) * 100).toInt())
 
-                                    } catch (e: Exception){
+                                    } catch (e: Exception) {
                                         Timber.tag("ERROR").v(e.toString())
                                     }
 

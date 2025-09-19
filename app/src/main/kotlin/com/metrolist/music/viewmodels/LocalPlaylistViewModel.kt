@@ -56,6 +56,7 @@ constructor(
                     collator.strength = Collator.PRIMARY
                     songs.sortedWith(compareBy(collator) { it.song.song.title })
                 }
+
                 PlaylistSongSortType.ARTIST -> {
                     val collator = Collator.getInstance(Locale.getDefault())
                     collator.strength = Collator.PRIMARY

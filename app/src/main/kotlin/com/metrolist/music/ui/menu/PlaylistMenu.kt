@@ -13,11 +13,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,7 +25,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -126,10 +125,10 @@ fun PlaylistMenu(
             title = { Text(text = stringResource(R.string.edit_playlist)) },
             onDismiss = { showEditDialog = false },
             initialTextFieldValue =
-            TextFieldValue(
-                playlist.playlist.name,
-                TextRange(playlist.playlist.name.length),
-            ),
+                TextFieldValue(
+                    playlist.playlist.name,
+                    TextRange(playlist.playlist.name.length),
+                ),
             onDone = { name ->
                 onDismiss()
                 database.query {
@@ -325,7 +324,10 @@ fun PlaylistMenu(
                     val intent = Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/playlist?list=${dbPlaylist?.playlist?.browseId}")
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "https://music.youtube.com/playlist?list=${dbPlaylist?.playlist?.browseId}"
+                        )
                     }
                     context.startActivity(Intent.createChooser(intent, null))
                 }
@@ -439,6 +441,7 @@ fun PlaylistMenu(
                             }
                         )
                     }
+
                     Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> {
                         ListItem(
                             headlineContent = { Text(text = stringResource(R.string.downloading)) },
@@ -453,6 +456,7 @@ fun PlaylistMenu(
                             }
                         )
                     }
+
                     else -> {
                         ListItem(
                             headlineContent = { Text(text = stringResource(R.string.action_download)) },

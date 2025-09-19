@@ -2,30 +2,28 @@ package com.metrolist.music.ui.screens.playlist
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.content.Intent
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,10 +32,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
-import com.metrolist.music.ui.component.ActionPromptDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -46,10 +44,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -93,13 +89,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
-import com.yalantis.ucrop.UCrop
-import com.metrolist.music.ui.component.OverlayEditButton
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastAny
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastSumBy
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
@@ -111,7 +105,6 @@ import coil3.compose.AsyncImage
 import com.metrolist.innertube.YouTube
 import com.metrolist.innertube.models.SongItem
 import com.metrolist.innertube.utils.completed
-import kotlinx.coroutines.launch
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.LocalDownloadUtil
 import com.metrolist.music.LocalPlayerAwareWindowInsets
@@ -130,10 +123,11 @@ import com.metrolist.music.db.entities.PlaylistSong
 import com.metrolist.music.db.entities.PlaylistSongMap
 import com.metrolist.music.extensions.move
 import com.metrolist.music.extensions.toMediaItem
-import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.extensions.togglePlayPause
+import com.metrolist.music.models.toMediaMetadata
 import com.metrolist.music.playback.ExoDownloadService
 import com.metrolist.music.playback.queues.ListQueue
+import com.metrolist.music.ui.component.ActionPromptDialog
 import com.metrolist.music.ui.component.AutoResizeText
 import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.DraggableScrollbar
@@ -141,6 +135,7 @@ import com.metrolist.music.ui.component.EmptyPlaceholder
 import com.metrolist.music.ui.component.FontSizeRange
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.LocalMenuState
+import com.metrolist.music.ui.component.OverlayEditButton
 import com.metrolist.music.ui.component.SongListItem
 import com.metrolist.music.ui.component.SortHeader
 import com.metrolist.music.ui.component.TextFieldDialog
@@ -155,8 +150,10 @@ import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
 import com.metrolist.music.utils.reportException
 import com.metrolist.music.viewmodels.LocalPlaylistViewModel
+import com.yalantis.ucrop.UCrop
 import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
@@ -433,7 +430,8 @@ fun LocalPlaylistScreen(
                     viewModel.viewModelScope.launch(Dispatchers.IO) {
                         val playlistSongMap = database.playlistSongMaps(viewModel.playlistId, 0)
                         val successorIndex = if (from > to) to else to + 1
-                        val successorSetVideoId = playlistSongMap.getOrNull(successorIndex)?.setVideoId
+                        val successorSetVideoId =
+                            playlistSongMap.getOrNull(successorIndex)?.setVideoId
 
                         playlistSongMap.getOrNull(from)?.setVideoId?.let { setVideoId ->
                             YouTube.moveSongPlaylist(
@@ -461,7 +459,8 @@ fun LocalPlaylistScreen(
     ) {
         LazyColumn(
             state = lazyListState,
-            contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime).asPaddingValues(),
+            contentPadding = LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime)
+                .asPaddingValues(),
         ) {
             playlist?.let { playlist ->
                 if (playlist.songCount == 0 && playlist.playlist.remoteSongCount == 0) {
@@ -564,9 +563,9 @@ fun LocalPlaylistScreen(
                         LaunchedEffect(dismissBoxState.currentValue) {
                             val dv = dismissBoxState.currentValue
                             if (!processedDismiss && (
-                                    dv == SwipeToDismissBoxValue.StartToEnd ||
-                                    dv == SwipeToDismissBoxValue.EndToStart
-                                )
+                                        dv == SwipeToDismissBoxValue.StartToEnd ||
+                                                dv == SwipeToDismissBoxValue.EndToStart
+                                        )
                             ) {
                                 processedDismiss = true
                                 deleteFromPlaylist()
@@ -615,32 +614,32 @@ fun LocalPlaylistScreen(
                                     }
                                 },
                                 modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .combinedClickable(
-                                        onClick = {
-                                            if (song.song.id == mediaMetadata?.id) {
-                                                playerConnection.player.togglePlayPause()
-                                            } else {
-                                                playerConnection.playQueue(
-                                                    ListQueue(
-                                                        title = playlist!!.playlist.name,
-                                                        items = songs.map { it.song.toMediaItem() },
-                                                        startIndex = songs.indexOfFirst { it.map.id == song.map.id },
-                                                    ),
-                                                )
-                                            }
-                                        },
-                                        onLongClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            if (!selection) {
-                                                selection = true
-                                            }
-                                            wrappedSongs.forEach { it.isSelected = false }
-                                            wrappedSongs.find { it.item.map.id == song.map.id }?.isSelected =
-                                                true
-                                        },
-                                    ),
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .combinedClickable(
+                                            onClick = {
+                                                if (song.song.id == mediaMetadata?.id) {
+                                                    playerConnection.player.togglePlayPause()
+                                                } else {
+                                                    playerConnection.playQueue(
+                                                        ListQueue(
+                                                            title = playlist!!.playlist.name,
+                                                            items = songs.map { it.song.toMediaItem() },
+                                                            startIndex = songs.indexOfFirst { it.map.id == song.map.id },
+                                                        ),
+                                                    )
+                                                }
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                if (!selection) {
+                                                    selection = true
+                                                }
+                                                wrappedSongs.forEach { it.isSelected = false }
+                                                wrappedSongs.find { it.item.map.id == song.map.id }?.isSelected =
+                                                    true
+                                            },
+                                        ),
                             )
                         }
 
@@ -687,9 +686,9 @@ fun LocalPlaylistScreen(
                         LaunchedEffect(dismissBoxState.currentValue) {
                             val dv = dismissBoxState.currentValue
                             if (!processedDismiss2 && (
-                                    dv == SwipeToDismissBoxValue.StartToEnd ||
-                                    dv == SwipeToDismissBoxValue.EndToStart
-                                )
+                                        dv == SwipeToDismissBoxValue.StartToEnd ||
+                                                dv == SwipeToDismissBoxValue.EndToStart
+                                        )
                             ) {
                                 processedDismiss2 = true
                                 deleteFromPlaylist()
@@ -738,35 +737,35 @@ fun LocalPlaylistScreen(
                                 },
                                 isSelected = songWrapper.isSelected && selection,
                                 modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .combinedClickable(
-                                        onClick = {
-                                            if (!selection) {
-                                                if (songWrapper.item.song.id == mediaMetadata?.id) {
-                                                    playerConnection.player.togglePlayPause()
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .combinedClickable(
+                                            onClick = {
+                                                if (!selection) {
+                                                    if (songWrapper.item.song.id == mediaMetadata?.id) {
+                                                        playerConnection.player.togglePlayPause()
+                                                    } else {
+                                                        playerConnection.playQueue(
+                                                            ListQueue(
+                                                                title = playlist!!.playlist.name,
+                                                                items = songs.map { it.song.toMediaItem() },
+                                                                startIndex = index,
+                                                            ),
+                                                        )
+                                                    }
                                                 } else {
-                                                    playerConnection.playQueue(
-                                                        ListQueue(
-                                                            title = playlist!!.playlist.name,
-                                                            items = songs.map { it.song.toMediaItem() },
-                                                            startIndex = index,
-                                                        ),
-                                                    )
+                                                    songWrapper.isSelected = !songWrapper.isSelected
                                                 }
-                                            } else {
-                                                songWrapper.isSelected = !songWrapper.isSelected
-                                            }
-                                        },
-                                        onLongClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            if (!selection) {
-                                                selection = true
-                                            }
-                                            wrappedSongs.forEach { it.isSelected = false }
-                                            songWrapper.isSelected = true
-                                        },
-                                    ),
+                                            },
+                                            onLongClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                if (!selection) {
+                                                    selection = true
+                                                }
+                                                wrappedSongs.forEach { it.isSelected = false }
+                                                songWrapper.isSelected = true
+                                            },
+                                        ),
                             )
                         }
 
@@ -916,9 +915,9 @@ fun LocalPlaylistScreen(
         SnackbarHost(
             hostState = snackbarHostState,
             modifier =
-            Modifier
-                .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime))
-                .align(Alignment.BottomCenter),
+                Modifier
+                    .windowInsetsPadding(LocalPlayerAwareWindowInsets.current.union(WindowInsets.ime))
+                    .align(Alignment.BottomCenter),
         )
     }
 }
@@ -953,7 +952,7 @@ fun LocalPlaylistHeader(
     val liked = playlist.playlist.bookmarkedAt != null
     val editable: Boolean = playlist.playlist.isEditable
 
-    val overrideThumbnail = remember {mutableStateOf<String?>(null)}
+    val overrideThumbnail = remember { mutableStateOf<String?>(null) }
     var isCustomThumbnail: Boolean = playlist.thumbnails.firstOrNull()?.let {
         it.contains("studio_square_thumbnail") || it.contains("content://com.metrolist.music")
     } ?: false
@@ -963,12 +962,13 @@ fun LocalPlaylistHeader(
     var pendingCropDestUri by remember { mutableStateOf<Uri?>(null) }
     var showEditNoteDialog by remember { mutableStateOf(false) }
 
-    val cropLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
-        if (res.resultCode == android.app.Activity.RESULT_OK) {
-            val output = res.data?.let { UCrop.getOutput(it) } ?: pendingCropDestUri
-            if (output != null) result.value = output
+    val cropLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { res ->
+            if (res.resultCode == android.app.Activity.RESULT_OK) {
+                val output = res.data?.let { UCrop.getOutput(it) } ?: pendingCropDestUri
+                if (output != null) result.value = output
+            }
         }
-    }
 
     val (darkMode, _) = rememberEnumPreference(
         DarkModeKey,
@@ -982,16 +982,20 @@ fun LocalPlaylistHeader(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         uri?.let { sourceUri ->
-            val destFile = java.io.File(context.cacheDir, "playlist_cover_crop_${System.currentTimeMillis()}.jpg")
-            val destUri = FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", destFile)
+            val destFile = java.io.File(
+                context.cacheDir,
+                "playlist_cover_crop_${System.currentTimeMillis()}.jpg"
+            )
+            val destUri =
+                FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", destFile)
             pendingCropDestUri = destUri
-    
+
             val options = UCrop.Options().apply {
                 setCompressionFormat(Bitmap.CompressFormat.JPEG)
                 setCompressionQuality(90)
                 setHideBottomControls(true)
                 setToolbarTitle(context.getString(R.string.edit_playlist_cover))
-                
+
                 setStatusBarLight(!darkTheme)
 
                 setToolbarColor(cropColor.surface.toArgb())
@@ -1116,6 +1120,7 @@ fun LocalPlaylistHeader(
                         modifier = Modifier.size(AlbumThumbnailSize / 2)
                     )
                 }
+
                 1 -> {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -1150,23 +1155,36 @@ fun LocalPlaylistHeader(
 
                                                                 // Update the database to remove the custom thumbnail
                                                                 database.query {
-                                                                    update(playlist.playlist.copy(thumbnailUrl = null))
+                                                                    update(
+                                                                        playlist.playlist.copy(
+                                                                            thumbnailUrl = null
+                                                                        )
+                                                                    )
                                                                 }
                                                             }
+
                                                             else -> {
                                                                 scope.launch(Dispatchers.IO) {
-                                                                    YouTube.removeThumbnailPlaylist(playlist.playlist.browseId).onSuccess { newThumbnailUrl -> newThumbnailUrl
-                                                                        overrideThumbnail.value = newThumbnailUrl
+                                                                    YouTube.removeThumbnailPlaylist(
+                                                                        playlist.playlist.browseId
+                                                                    ).onSuccess { newThumbnailUrl ->
+                                                                        newThumbnailUrl
+                                                                        overrideThumbnail.value =
+                                                                            newThumbnailUrl
 
                                                                         // Update the database to remove the custom thumbnail
                                                                         database.query {
-                                                                            update(playlist.playlist.copy(thumbnailUrl = newThumbnailUrl))
+                                                                            update(
+                                                                                playlist.playlist.copy(
+                                                                                    thumbnailUrl = newThumbnailUrl
+                                                                                )
+                                                                            )
                                                                         }
                                                                     }
                                                                 }
                                                             }
                                                         }
-                                                        isCustomThumbnail = false 
+                                                        isCustomThumbnail = false
                                                     },
                                                     onDismiss = menuState::dismiss
                                                 )
@@ -1181,6 +1199,7 @@ fun LocalPlaylistHeader(
                         }
                     }
                 }
+
                 else -> {
                     Box(
                         modifier =
@@ -1195,7 +1214,9 @@ fun LocalPlaylistHeader(
                             Alignment.BottomEnd,
                         ).fastForEachIndexed { index, alignment ->
                             AsyncImage(
-                                model = overrideThumbnail.value ?: playlist.thumbnails.getOrNull(index),
+                                model = overrideThumbnail.value ?: playlist.thumbnails.getOrNull(
+                                    index
+                                ),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier =
@@ -1224,23 +1245,36 @@ fun LocalPlaylistHeader(
 
                                                                 // Update the database to remove the custom thumbnail
                                                                 database.query {
-                                                                    update(playlist.playlist.copy(thumbnailUrl = null))
+                                                                    update(
+                                                                        playlist.playlist.copy(
+                                                                            thumbnailUrl = null
+                                                                        )
+                                                                    )
                                                                 }
                                                             }
+
                                                             else -> {
                                                                 scope.launch(Dispatchers.IO) {
-                                                                    YouTube.removeThumbnailPlaylist(playlist.playlist.browseId).onSuccess { newThumbnailUrl -> newThumbnailUrl
-                                                                        overrideThumbnail.value = newThumbnailUrl
+                                                                    YouTube.removeThumbnailPlaylist(
+                                                                        playlist.playlist.browseId
+                                                                    ).onSuccess { newThumbnailUrl ->
+                                                                        newThumbnailUrl
+                                                                        overrideThumbnail.value =
+                                                                            newThumbnailUrl
 
                                                                         // Update the database to remove the custom thumbnail
                                                                         database.query {
-                                                                            update(playlist.playlist.copy(thumbnailUrl = newThumbnailUrl))
+                                                                            update(
+                                                                                playlist.playlist.copy(
+                                                                                    thumbnailUrl = newThumbnailUrl
+                                                                                )
+                                                                            )
                                                                         }
                                                                     }
                                                                 }
                                                             }
                                                         }
-                                                        isCustomThumbnail = false 
+                                                        isCustomThumbnail = false
                                                     },
                                                     onDismiss = menuState::dismiss
                                                 )
@@ -1256,7 +1290,7 @@ fun LocalPlaylistHeader(
                     }
                 }
             }
-            
+
             Column(
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -1270,18 +1304,18 @@ fun LocalPlaylistHeader(
 
                 Text(
                     text =
-                    if (playlist.songCount == 0 && playlist.playlist.remoteSongCount != null)
-                        pluralStringResource(
-                            R.plurals.n_song,
-                            playlist.playlist.remoteSongCount,
-                            playlist.playlist.remoteSongCount
-                        )
-                    else
-                        pluralStringResource(
-                            R.plurals.n_song,
-                            playlist.songCount,
-                            playlist.songCount
-                        ),
+                        if (playlist.songCount == 0 && playlist.playlist.remoteSongCount != null)
+                            pluralStringResource(
+                                R.plurals.n_song,
+                                playlist.playlist.remoteSongCount,
+                                playlist.playlist.remoteSongCount
+                            )
+                        else
+                            pluralStringResource(
+                                R.plurals.n_song,
+                                playlist.songCount,
+                                playlist.songCount
+                            ),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Normal,
                 )

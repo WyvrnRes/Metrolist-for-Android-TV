@@ -1,5 +1,8 @@
 package com.metrolist.music.ui.player
 
+import android.app.Activity
+import android.content.res.Configuration
+import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -8,6 +11,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +20,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,24 +27,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.ripple
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,31 +47,23 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.zIndex
-import android.app.Activity
-import android.content.res.Configuration
-import android.view.WindowManager
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.Player.STATE_READY
+import androidx.navigation.NavController
 import androidx.palette.graphics.Palette
-import androidx.core.graphics.drawable.toBitmap
 import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -88,33 +77,29 @@ import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.PlayerBackgroundStyleKey
 import com.metrolist.music.constants.SliderStyle
 import com.metrolist.music.constants.SliderStyleKey
-import com.metrolist.music.constants.ThumbnailCornerRadius
+import com.metrolist.music.constants.StarryBackgroundKey
 import com.metrolist.music.db.entities.LyricsEntity
 import com.metrolist.music.extensions.togglePlayPause
 import com.metrolist.music.extensions.toggleRepeatMode
-import com.metrolist.music.lyrics.LyricsHelper
 import com.metrolist.music.models.MediaMetadata
-import com.metrolist.music.ui.component.Lyrics
+import com.metrolist.music.ui.component.BigSeekBar
 import com.metrolist.music.ui.component.LocalMenuState
+import com.metrolist.music.ui.component.Lyrics
 import com.metrolist.music.ui.component.PlayerSliderTrack
 import com.metrolist.music.ui.component.StarryBackground
-import com.metrolist.music.ui.component.BigSeekBar
-import androidx.navigation.NavController
-import me.saket.squiggles.SquigglySlider
 import com.metrolist.music.ui.menu.LyricsMenu
 import com.metrolist.music.ui.theme.PlayerColorExtractor
 import com.metrolist.music.ui.theme.PlayerSliderColors
+import com.metrolist.music.utils.makeTimeString
 import com.metrolist.music.utils.rememberEnumPreference
+import com.metrolist.music.utils.rememberPreference
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.runCatching
-import com.metrolist.music.utils.makeTimeString
-import androidx.compose.ui.text.style.TextAlign
-import com.metrolist.music.db.entities.SongEntity
+import me.saket.squiggles.SquigglySlider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,11 +111,11 @@ fun LyricsScreen(
 ) {
     val context = LocalContext.current
     val activity = context as? Activity
-    
+
     // Keep the screen on when entering the screen
     DisposableEffect(Unit) {
         activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        
+
         onDispose {
             // Remove the feature when exiting the screen
             activity?.window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -147,7 +132,7 @@ fun LyricsScreen(
     val repeatMode by playerConnection.repeatMode.collectAsState()
     val shuffleModeEnabled by playerConnection.shuffleModeEnabled.collectAsState()
     val playerVolume = playerConnection.service.playerVolume.collectAsState()
-    
+
     // slider style preference
     val sliderStyle by rememberEnumPreference(SliderStyleKey, SliderStyle.DEFAULT)
     val currentLyrics by playerConnection.currentLyrics.collectAsState(initial = null)
@@ -158,7 +143,7 @@ fun LyricsScreen(
         if (currentLyrics == null) {
             // Small delay to ensure database state is stable
             delay(500)
-            
+
             coroutineScope.launch(Dispatchers.IO) {
                 try {
                     // Get LyricsHelper from Hilt
@@ -167,10 +152,10 @@ fun LyricsScreen(
                         com.metrolist.music.di.LyricsHelperEntryPoint::class.java
                     )
                     val lyricsHelper = entryPoint.lyricsHelper()
-                    
+
                     // Fetch lyrics automatically
                     val lyrics = lyricsHelper.getLyrics(mediaMetadata)
-                    
+
                     // Save to database
                     database.query {
                         upsert(LyricsEntity(mediaMetadata.id, lyrics))
@@ -186,7 +171,15 @@ fun LyricsScreen(
     var duration by remember { mutableLongStateOf(C.TIME_UNSET) }
     var sliderPosition by remember { mutableStateOf<Long?>(null) }
 
-    val playerBackground by rememberEnumPreference(PlayerBackgroundStyleKey, PlayerBackgroundStyle.DEFAULT)
+    val playerBackground by rememberEnumPreference(
+        PlayerBackgroundStyleKey,
+        PlayerBackgroundStyle.DEFAULT
+    )
+
+    val (useStarryBackground) = rememberPreference(
+        StarryBackgroundKey,
+        defaultValue = false
+    )
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val useDarkTheme = isSystemInDarkTheme
@@ -194,7 +187,8 @@ fun LyricsScreen(
     var gradientColors by remember { mutableStateOf<List<Color>>(emptyList()) }
     val gradientColorsCache = remember { mutableMapOf<String, List<Color>>() }
 
-    val defaultGradientColors = listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant)
+    val defaultGradientColors =
+        listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceVariant)
     val fallbackColor = MaterialTheme.colorScheme.surface.toArgb()
 
     LaunchedEffect(mediaMetadata.id, playerBackground) {
@@ -206,7 +200,12 @@ fun LyricsScreen(
                 } else {
                     val request = ImageRequest.Builder(context)
                         .data(mediaMetadata.thumbnailUrl)
-                        .size(Size(PlayerColorExtractor.Config.IMAGE_SIZE, PlayerColorExtractor.Config.IMAGE_SIZE))
+                        .size(
+                            Size(
+                                PlayerColorExtractor.Config.IMAGE_SIZE,
+                                PlayerColorExtractor.Config.IMAGE_SIZE
+                            )
+                        )
                         .allowHardware(false)
                         .memoryCacheKey("gradient_${mediaMetadata.id}")
                         .build()
@@ -214,7 +213,7 @@ fun LyricsScreen(
                     val result = runCatching {
                         context.imageLoader.execute(request).image
                     }.getOrNull()
-                    
+
                     if (result != null) {
                         val bitmap = result.toBitmap()
                         val palette = withContext(Dispatchers.Default) {
@@ -223,12 +222,12 @@ fun LyricsScreen(
                                 .resizeBitmapArea(PlayerColorExtractor.Config.BITMAP_AREA)
                                 .generate()
                         }
-                        
+
                         val extractedColors = PlayerColorExtractor.extractGradientColors(
                             palette = palette,
                             fallbackColor = fallbackColor
                         )
-                        
+
                         gradientColorsCache[mediaMetadata.id] = extractedColors
                         gradientColors = extractedColors
                     } else {
@@ -247,14 +246,12 @@ fun LyricsScreen(
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
         PlayerBackgroundStyle.BLUR -> Color.White
         PlayerBackgroundStyle.GRADIENT -> Color.White
-        PlayerBackgroundStyle.STARRY -> Color.White
     }
 
     val icBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.surface
         PlayerBackgroundStyle.BLUR -> Color.Black
         PlayerBackgroundStyle.GRADIENT -> Color.Black
-        PlayerBackgroundStyle.STARRY -> Color.Black
     }
 
     LaunchedEffect(playbackState) {
@@ -321,14 +318,21 @@ fun LyricsScreen(
                                 1.0f to Color.Black // Bottom: black
                             )
                         }
-                        Box(modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(colorStops = gradientColorStops)))
-                        Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.2f)))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Brush.verticalGradient(colorStops = gradientColorStops))
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.2f))
+                        )
                     }
                 }
             }
 
-            // Starry background
-            if (playerBackground == PlayerBackgroundStyle.STARRY) {
+            if (useStarryBackground && playerBackground == PlayerBackgroundStyle.DEFAULT) {
                 StarryBackground(
                     modifier = Modifier.fillMaxSize(),
                     backgroundColor = if (useDarkTheme) Color.Black else Color(0xFF0D1B2A),
@@ -336,15 +340,6 @@ fun LyricsScreen(
                 )
             }
         }
-
-        if (playerBackground != PlayerBackgroundStyle.DEFAULT && playerBackground != PlayerBackgroundStyle.STARRY) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
-            )
-        }
-
         // Check orientation and layout accordingly
         when (LocalConfiguration.current.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
@@ -383,7 +378,7 @@ fun LyricsScreen(
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-                        
+
                         // Now Playing info in center
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -402,7 +397,7 @@ fun LyricsScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        
+
                         // More button (right)
                         Box(
                             modifier = Modifier
@@ -433,7 +428,7 @@ fun LyricsScreen(
                             )
                         }
                     }
-                    
+
                     // Main content row
                     Row(
                         modifier = Modifier
@@ -458,7 +453,7 @@ fun LyricsScreen(
                                 )
                             }
                         }
-                        
+
                         // Left side - Controls only (from slider to volume)
                         Column(
                             modifier = Modifier
@@ -484,10 +479,15 @@ fun LyricsScreen(
                                             }
                                             sliderPosition = null
                                         },
-                                        colors = PlayerSliderColors.defaultSliderColors(textBackgroundColor, playerBackground, useDarkTheme),
+                                        colors = PlayerSliderColors.defaultSliderColors(
+                                            textBackgroundColor,
+                                            playerBackground,
+                                            useDarkTheme
+                                        ),
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 }
+
                                 SliderStyle.SQUIGGLY -> {
                                     SquigglySlider(
                                         value = (sliderPosition ?: position).toFloat(),
@@ -502,7 +502,11 @@ fun LyricsScreen(
                                             }
                                             sliderPosition = null
                                         },
-                                        colors = PlayerSliderColors.squigglySliderColors(textBackgroundColor, playerBackground, useDarkTheme),
+                                        colors = PlayerSliderColors.squigglySliderColors(
+                                            textBackgroundColor,
+                                            playerBackground,
+                                            useDarkTheme
+                                        ),
                                         modifier = Modifier.fillMaxWidth(),
                                         squigglesSpec = SquigglySlider.SquigglesSpec(
                                             amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
@@ -510,6 +514,7 @@ fun LyricsScreen(
                                         )
                                     )
                                 }
+
                                 SliderStyle.SLIM -> {
                                     Slider(
                                         value = (sliderPosition ?: position).toFloat(),
@@ -528,7 +533,11 @@ fun LyricsScreen(
                                         track = { sliderState ->
                                             PlayerSliderTrack(
                                                 sliderState = sliderState,
-                                                colors = PlayerSliderColors.slimSliderColors(textBackgroundColor, playerBackground, useDarkTheme)
+                                                colors = PlayerSliderColors.slimSliderColors(
+                                                    textBackgroundColor,
+                                                    playerBackground,
+                                                    useDarkTheme
+                                                )
                                             )
                                         },
                                         modifier = Modifier.fillMaxWidth()
@@ -573,8 +582,9 @@ fun LyricsScreen(
                                     Icon(
                                         painter = painterResource(
                                             when (repeatMode) {
-                                                Player.REPEAT_MODE_OFF, 
+                                                Player.REPEAT_MODE_OFF,
                                                 Player.REPEAT_MODE_ALL -> R.drawable.repeat
+
                                                 Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
                                                 else -> R.drawable.repeat
                                             }
@@ -616,7 +626,9 @@ fun LyricsScreen(
                                         painter = painterResource(
                                             if (isPlaying) R.drawable.pause else R.drawable.play
                                         ),
-                                        contentDescription = if (isPlaying) "Pause" else stringResource(R.string.play),
+                                        contentDescription = if (isPlaying) "Pause" else stringResource(
+                                            R.string.play
+                                        ),
                                         tint = textBackgroundColor,
                                         modifier = Modifier.size(36.dp)
                                     )
@@ -637,12 +649,17 @@ fun LyricsScreen(
 
                                 // Shuffle button
                                 IconButton(
-                                    onClick = { playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled },
+                                    onClick = {
+                                        playerConnection.player.shuffleModeEnabled =
+                                            !shuffleModeEnabled
+                                    },
                                     modifier = Modifier.size(40.dp)
                                 ) {
                                     Icon(
                                         painter = painterResource(R.drawable.shuffle),
-                                        contentDescription = if (shuffleModeEnabled) stringResource(R.string.shuffle) else stringResource(R.string.shuffle),
+                                        contentDescription = if (shuffleModeEnabled) stringResource(
+                                            R.string.shuffle
+                                        ) else stringResource(R.string.shuffle),
                                         tint = if (shuffleModeEnabled) {
                                             textBackgroundColor
                                         } else {
@@ -672,7 +689,9 @@ fun LyricsScreen(
 
                                 BigSeekBar(
                                     progressProvider = playerVolume::value,
-                                    onProgressChange = { playerConnection.service.playerVolume.value = it },
+                                    onProgressChange = {
+                                        playerConnection.service.playerVolume.value = it
+                                    },
                                     color = textBackgroundColor,
                                     modifier = Modifier
                                         .weight(1f)
@@ -691,6 +710,7 @@ fun LyricsScreen(
                     }
                 }
             }
+
             else -> {
                 // Portrait layout - original layout
                 Column(
@@ -726,7 +746,7 @@ fun LyricsScreen(
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-                        
+
                         // Centered content
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -745,7 +765,7 @@ fun LyricsScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                         }
-                        
+
                         // More button (right)
                         Box(
                             modifier = Modifier
@@ -809,10 +829,15 @@ fun LyricsScreen(
                                         }
                                         sliderPosition = null
                                     },
-                                    colors = PlayerSliderColors.defaultSliderColors(textBackgroundColor, playerBackground, useDarkTheme),
+                                    colors = PlayerSliderColors.defaultSliderColors(
+                                        textBackgroundColor,
+                                        playerBackground,
+                                        useDarkTheme
+                                    ),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
+
                             SliderStyle.SQUIGGLY -> {
                                 SquigglySlider(
                                     value = (sliderPosition ?: position).toFloat(),
@@ -827,7 +852,11 @@ fun LyricsScreen(
                                         }
                                         sliderPosition = null
                                     },
-                                    colors = PlayerSliderColors.squigglySliderColors(textBackgroundColor, playerBackground, useDarkTheme),
+                                    colors = PlayerSliderColors.squigglySliderColors(
+                                        textBackgroundColor,
+                                        playerBackground,
+                                        useDarkTheme
+                                    ),
                                     modifier = Modifier.fillMaxWidth(),
                                     squigglesSpec = SquigglySlider.SquigglesSpec(
                                         amplitude = if (isPlaying) (2.dp).coerceAtLeast(2.dp) else 0.dp,
@@ -835,6 +864,7 @@ fun LyricsScreen(
                                     )
                                 )
                             }
+
                             SliderStyle.SLIM -> {
                                 Slider(
                                     value = (sliderPosition ?: position).toFloat(),
@@ -853,7 +883,11 @@ fun LyricsScreen(
                                     track = { sliderState ->
                                         PlayerSliderTrack(
                                             sliderState = sliderState,
-                                            colors = PlayerSliderColors.slimSliderColors(textBackgroundColor, playerBackground, useDarkTheme)
+                                            colors = PlayerSliderColors.slimSliderColors(
+                                                textBackgroundColor,
+                                                playerBackground,
+                                                useDarkTheme
+                                            )
                                         )
                                     },
                                     modifier = Modifier.fillMaxWidth()
@@ -898,8 +932,9 @@ fun LyricsScreen(
                                 Icon(
                                     painter = painterResource(
                                         when (repeatMode) {
-                                            Player.REPEAT_MODE_OFF, 
+                                            Player.REPEAT_MODE_OFF,
                                             Player.REPEAT_MODE_ALL -> R.drawable.repeat
+
                                             Player.REPEAT_MODE_ONE -> R.drawable.repeat_one
                                             else -> R.drawable.repeat
                                         }
@@ -943,7 +978,9 @@ fun LyricsScreen(
                                     painter = painterResource(
                                         if (isPlaying) R.drawable.pause else R.drawable.play
                                     ),
-                                    contentDescription = if (isPlaying) "Pause" else stringResource(R.string.play),
+                                    contentDescription = if (isPlaying) "Pause" else stringResource(
+                                        R.string.play
+                                    ),
                                     tint = textBackgroundColor,
                                     modifier = Modifier.size(36.dp)
                                 )
@@ -964,12 +1001,16 @@ fun LyricsScreen(
 
                             // Shuffle button with clear state indication
                             IconButton(
-                                onClick = { playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled },
+                                onClick = {
+                                    playerConnection.player.shuffleModeEnabled = !shuffleModeEnabled
+                                },
                                 modifier = Modifier.size(40.dp)
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.shuffle),
-                                    contentDescription = if (shuffleModeEnabled) stringResource(R.string.shuffle) else stringResource(R.string.shuffle),
+                                    contentDescription = if (shuffleModeEnabled) stringResource(R.string.shuffle) else stringResource(
+                                        R.string.shuffle
+                                    ),
                                     tint = if (shuffleModeEnabled) {
                                         // Active state - full brightness
                                         textBackgroundColor
@@ -1001,7 +1042,9 @@ fun LyricsScreen(
 
                             BigSeekBar(
                                 progressProvider = playerVolume::value,
-                                onProgressChange = { playerConnection.service.playerVolume.value = it },
+                                onProgressChange = {
+                                    playerConnection.service.playerVolume.value = it
+                                },
                                 color = textBackgroundColor,
                                 modifier = Modifier
                                     .weight(1f)

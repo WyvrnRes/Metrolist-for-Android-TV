@@ -22,10 +22,10 @@ class AccountSettingsViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             // Clear all YouTube Music synced content first
             syncUtils.clearAllSyncedContent()
-            
+
             // Then clear account preferences
             App.forgetAccount(context)
-            
+
             // Clear cookie in UI
             onCookieChange("")
         }

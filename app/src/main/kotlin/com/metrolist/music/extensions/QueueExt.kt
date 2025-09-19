@@ -1,11 +1,14 @@
 package com.metrolist.music.extensions
 
+import com.metrolist.music.models.MediaMetadata
 import com.metrolist.music.models.PersistQueue
 import com.metrolist.music.models.QueueData
 import com.metrolist.music.models.QueueType
-import com.metrolist.music.models.MediaMetadata
-import com.metrolist.music.playback.queues.*
-import com.metrolist.music.db.entities.AlbumEntity
+import com.metrolist.music.playback.queues.ListQueue
+import com.metrolist.music.playback.queues.LocalAlbumRadio
+import com.metrolist.music.playback.queues.Queue
+import com.metrolist.music.playback.queues.YouTubeAlbumRadio
+import com.metrolist.music.playback.queues.YouTubeQueue
 
 fun Queue.toPersistQueue(
     title: String?,
@@ -21,6 +24,7 @@ fun Queue.toPersistQueue(
             position = position,
             queueType = QueueType.LIST
         )
+
         is YouTubeQueue -> {
             // Since endpoint is private, we'll store a simplified version
             val endpoint = "youtube_queue"
@@ -33,6 +37,7 @@ fun Queue.toPersistQueue(
                 queueData = QueueData.YouTubeData(endpoint = endpoint)
             )
         }
+
         is YouTubeAlbumRadio -> {
             // Since playlistId is private, we'll store a simplified version
             PersistQueue(
@@ -46,6 +51,7 @@ fun Queue.toPersistQueue(
                 )
             )
         }
+
         is LocalAlbumRadio -> {
             // Since albumWithSongs and startIndex are private, we'll store a simplified version
             PersistQueue(
@@ -60,6 +66,7 @@ fun Queue.toPersistQueue(
                 )
             )
         }
+
         else -> PersistQueue(
             title = title,
             items = items,
@@ -78,6 +85,7 @@ fun PersistQueue.toQueue(): Queue {
             startIndex = mediaItemIndex,
             position = position
         )
+
         is QueueType.YOUTUBE -> {
             // For now, fallback to ListQueue since we can't reconstruct YouTubeQueue properly
             ListQueue(
@@ -87,6 +95,7 @@ fun PersistQueue.toQueue(): Queue {
                 position = position
             )
         }
+
         is QueueType.YOUTUBE_ALBUM_RADIO -> {
             // For now, fallback to ListQueue since we can't reconstruct YouTubeAlbumRadio properly
             ListQueue(
@@ -96,6 +105,7 @@ fun PersistQueue.toQueue(): Queue {
                 position = position
             )
         }
+
         is QueueType.LOCAL_ALBUM_RADIO -> {
             // For now, fallback to ListQueue since we can't reconstruct LocalAlbumRadio properly
             ListQueue(

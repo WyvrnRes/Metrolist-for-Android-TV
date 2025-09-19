@@ -114,11 +114,15 @@ fun CachePlaylistScreen(
 
     val wrappedSongs = remember(cachedSongs, sortType, sortDescending) {
         val sortedSongs = when (sortType) {
-            SongSortType.CREATE_DATE -> cachedSongs.sortedBy { it.song.dateDownload ?: LocalDateTime.MIN }
+            SongSortType.CREATE_DATE -> cachedSongs.sortedBy {
+                it.song.dateDownload ?: LocalDateTime.MIN
+            }
+
             SongSortType.NAME -> cachedSongs.sortedBy { it.song.title }
             SongSortType.ARTIST -> cachedSongs.sortedBy { song ->
                 song.artists.joinToString(separator = "") { it.name }
             }
+
             SongSortType.PLAY_TIME -> cachedSongs.sortedBy { it.song.totalPlayTime }
         }.let { if (sortDescending) it.reversed() else it }
 
@@ -153,7 +157,7 @@ fun CachePlaylistScreen(
         else wrappedSongs.filter { wrapper ->
             val song = wrapper.item
             song.title.contains(query.text, true) ||
-                song.artists.any { it.name.contains(query.text, true) }
+                    song.artists.any { it.name.contains(query.text, true) }
         }
     }
 
@@ -298,7 +302,9 @@ fun CachePlaylistScreen(
                     }
                 }
 
-                itemsIndexed(filteredSongs, key = { _, song -> song.item.id }) { index, songWrapper ->
+                itemsIndexed(
+                    filteredSongs,
+                    key = { _, song -> song.item.id }) { index, songWrapper ->
                     SongListItem(
                         song = songWrapper.item,
                         isActive = songWrapper.item.id == mediaMetadata?.id,
@@ -378,6 +384,7 @@ fun CachePlaylistScreen(
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
+
                     isSearching -> {
                         TextField(
                             value = query,
@@ -403,6 +410,7 @@ fun CachePlaylistScreen(
                                 .focusRequester(focusRequester)
                         )
                     }
+
                     else -> {
                         Text(
                             stringResource(R.string.cached_playlist),
@@ -419,9 +427,11 @@ fun CachePlaylistScreen(
                             query = TextFieldValue()
                             focusManager.clearFocus()
                         }
+
                         selection -> {
                             selection = false
                         }
+
                         else -> {
                             navController.navigateUp()
                         }
@@ -460,7 +470,8 @@ fun CachePlaylistScreen(
                     IconButton(onClick = {
                         menuState.show {
                             SelectionSongMenu(
-                                songSelection = wrappedSongs.filter { it.isSelected }.map { it.item },
+                                songSelection = wrappedSongs.filter { it.isSelected }
+                                    .map { it.item },
                                 onDismiss = menuState::dismiss,
                                 clearAction = { selection = false }
                             )

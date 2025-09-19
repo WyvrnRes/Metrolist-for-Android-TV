@@ -1,7 +1,7 @@
 package com.metrolist.music.extensions
 
-import com.metrolist.music.db.entities.Song
 import com.metrolist.music.db.entities.Album
+import com.metrolist.music.db.entities.Song
 
 fun <T> List<T>.reversed(reversed: Boolean) = if (reversed) asReversed() else this
 

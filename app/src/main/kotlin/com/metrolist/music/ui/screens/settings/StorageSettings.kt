@@ -14,7 +14,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarScrollBehavior
@@ -41,7 +40,6 @@ import com.metrolist.music.constants.MaxImageCacheSizeKey
 import com.metrolist.music.constants.MaxSongCacheSizeKey
 import com.metrolist.music.extensions.tryOrNull
 import com.metrolist.music.ui.component.ActionPromptDialog
-import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.IconButton
 import com.metrolist.music.ui.component.ListPreference
 import com.metrolist.music.ui.component.PreferenceEntry
@@ -160,7 +158,8 @@ fun StorageSettings(
 
         PreferenceEntry(
             title = { Text(stringResource(R.string.clear_all_downloads)) },
-            onClick = {clearDownloads = true
+            onClick = {
+                clearDownloads = true
             },
         )
 
@@ -199,9 +198,9 @@ fun StorageSettings(
                 LinearProgressIndicator(
                     progress = { playerCacheProgress },
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp),
                     color = MaterialTheme.colorScheme.primary, // Explicitly use theme color
                     trackColor = MaterialTheme.colorScheme.surfaceVariant, // Use appropriate track color
                     strokeCap = StrokeCap.Round // M3 default style
@@ -209,14 +208,14 @@ fun StorageSettings(
 
                 Text(
                     text =
-                    stringResource(
-                        R.string.size_used,
-                        "${formatFileSize(playerCacheSize)} / ${
-                            formatFileSize(
-                                maxSongCacheSize * 1024 * 1024L,
-                            )
-                        }",
-                    ),
+                        stringResource(
+                            R.string.size_used,
+                            "${formatFileSize(playerCacheSize)} / ${
+                                formatFileSize(
+                                    maxSongCacheSize * 1024 * 1024L,
+                                )
+                            }",
+                        ),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                 )
@@ -239,7 +238,8 @@ fun StorageSettings(
 
         PreferenceEntry(
             title = { Text(stringResource(R.string.clear_song_cache)) },
-            onClick = { clearCacheDialog = true
+            onClick = {
+                clearCacheDialog = true
             },
         )
 
@@ -271,9 +271,9 @@ fun StorageSettings(
             LinearProgressIndicator(
                 progress = { imageCacheProgress },
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 6.dp),
                 color = MaterialTheme.colorScheme.primary, // Explicitly use theme color
                 trackColor = MaterialTheme.colorScheme.surfaceVariant, // Use appropriate track color
                 strokeCap = StrokeCap.Round // M3 default style
@@ -304,7 +304,8 @@ fun StorageSettings(
 
         PreferenceEntry(
             title = { Text(stringResource(R.string.clear_image_cache)) },
-            onClick = { clearImageCacheDialog = true
+            onClick = {
+                clearImageCacheDialog = true
             },
         )
 

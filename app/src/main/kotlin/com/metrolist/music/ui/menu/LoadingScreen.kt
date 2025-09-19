@@ -15,7 +15,7 @@ fun LoadingScreen(
     value: Int,
 ) {
     if (isVisible) {
-        Dialog (
+        Dialog(
             onDismissRequest = {}
         ) {
             Column(

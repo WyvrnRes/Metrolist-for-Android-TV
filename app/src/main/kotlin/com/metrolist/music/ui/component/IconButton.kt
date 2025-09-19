@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.IconButtonColors
@@ -45,6 +44,12 @@ fun ResizableIconButton(
         contentDescription = null,
         colorFilter = ColorFilter.tint(color),
         modifier = modifier
+//            .tvRemoteClickable(
+//                indication = indication ?: ripple(bounded = false),
+//                interactionSource = remember { MutableInteractionSource() },
+//                enabled = enabled,
+//                onClick = onClick
+//            )
             .clickable(
                 indication = indication ?: ripple(bounded = false),
                 interactionSource = remember { MutableInteractionSource() },
@@ -72,6 +77,17 @@ fun IconButton(
             .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
             .clip(CircleShape)
             .background(color = colors.containerColor)
+//            .tvRemoteCombinedClickable(
+//                onClick = onClick,
+//                onLongClick = onLongClick,
+//                enabled = enabled,
+//                role = Role.Button,
+//                interactionSource = interactionSource,
+//                indication = ripple(
+//                    bounded = false,
+//                    radius = 24.dp
+//                ),
+//            )
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,

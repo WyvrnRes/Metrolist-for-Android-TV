@@ -22,10 +22,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,7 +69,6 @@ import com.metrolist.music.db.entities.Song
 import com.metrolist.music.extensions.toMediaItem
 import com.metrolist.music.playback.ExoDownloadService
 import com.metrolist.music.playback.queues.ListQueue
-import com.metrolist.music.playback.queues.LocalAlbumRadio
 import com.metrolist.music.ui.component.AlbumListItem
 import com.metrolist.music.ui.component.ListDialog
 import com.metrolist.music.ui.component.ListItem
@@ -188,8 +187,8 @@ fun AlbumMenu(
                         )
                     },
                     modifier =
-                    Modifier
-                        .clickable { showErrorPlaylistAddDialog = false },
+                        Modifier
+                            .clickable { showErrorPlaylistAddDialog = false },
                 )
             }
 
@@ -210,14 +209,14 @@ fun AlbumMenu(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier =
-                    Modifier
-                        .height(ListItemHeight)
-                        .clickable {
-                            navController.navigate("artist/${artist.id}")
-                            showSelectArtistDialog = false
-                            onDismiss()
-                        }
-                        .padding(horizontal = 12.dp),
+                        Modifier
+                            .height(ListItemHeight)
+                            .clickable {
+                                navController.navigate("artist/${artist.id}")
+                                showSelectArtistDialog = false
+                                onDismiss()
+                            }
+                            .padding(horizontal = 12.dp),
                 ) {
                     Box(
                         modifier = Modifier.padding(8.dp),
@@ -227,9 +226,9 @@ fun AlbumMenu(
                             model = artist.thumbnailUrl,
                             contentDescription = null,
                             modifier =
-                            Modifier
-                                .size(ListThumbnailSize)
-                                .clip(CircleShape),
+                                Modifier
+                                    .size(ListThumbnailSize)
+                                    .clip(CircleShape),
                         )
                     }
                     Text(
@@ -239,9 +238,9 @@ fun AlbumMenu(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier =
-                        Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp),
+                            Modifier
+                                .weight(1f)
+                                .padding(horizontal = 8.dp),
                     )
                 }
             }
@@ -336,7 +335,10 @@ fun AlbumMenu(
                     val intent = Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "https://music.youtube.com/playlist?list=${album.album.playlistId}")
+                        putExtra(
+                            Intent.EXTRA_TEXT,
+                            "https://music.youtube.com/playlist?list=${album.album.playlistId}"
+                        )
                     }
                     context.startActivity(Intent.createChooser(intent, null))
                 }
@@ -425,6 +427,7 @@ fun AlbumMenu(
                         }
                     )
                 }
+
                 STATE_QUEUED, STATE_DOWNLOADING -> {
                     ListItem(
                         headlineContent = { Text(text = stringResource(R.string.downloading)) },
@@ -446,6 +449,7 @@ fun AlbumMenu(
                         }
                     )
                 }
+
                 else -> {
                     ListItem(
                         headlineContent = { Text(text = stringResource(R.string.action_download)) },

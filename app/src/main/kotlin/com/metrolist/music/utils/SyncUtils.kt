@@ -31,7 +31,7 @@ class SyncUtils @Inject constructor(
     private val database: MusicDatabase,
 ) {
     private val syncScope = CoroutineScope(Dispatchers.IO)
-    
+
     @OptIn(DelicateCoroutinesApi::class, ExperimentalCoroutinesApi::class)
     private val syncContext = newSingleThreadContext("syncUtils")
 
@@ -50,7 +50,7 @@ class SyncUtils @Inject constructor(
 
                 // Update local songs that are no longer liked remotely
                 localSongs.filterNot { it.id in remoteIds }
-                    .forEach { 
+                    .forEach {
                         try {
                             database.transaction {
                                 database.update(it.song.localToggleLike())
@@ -69,7 +69,12 @@ class SyncUtils @Inject constructor(
                             database.transaction {
                                 if (dbSong == null) {
                                     // Use proper MediaMetadata insertion to save artist information
-                                    insert(song.toMediaMetadata()) { it.copy(liked = true, likedDate = timestamp) }
+                                    insert(song.toMediaMetadata()) {
+                                        it.copy(
+                                            liked = true,
+                                            likedDate = timestamp
+                                        )
+                                    }
                                 } else if (!dbSong.song.liked || dbSong.song.likedDate != timestamp) {
                                     update(dbSong.song.copy(liked = true, likedDate = timestamp))
                                 }
@@ -94,7 +99,7 @@ class SyncUtils @Inject constructor(
                 val feedbackTokens = mutableListOf<String>()
 
                 localSongs.filterNot { it.id in remoteIds }
-                    .forEach { 
+                    .forEach {
                         if (it.song.libraryAddToken != null && it.song.libraryRemoveToken != null) {
                             feedbackTokens.add(it.song.libraryAddToken)
                         } else {
@@ -124,7 +129,11 @@ class SyncUtils @Inject constructor(
                                     if (dbSong.song.inLibrary == null) {
                                         update(dbSong.song.toggleLibrary())
                                     }
-                                    addLibraryTokens(song.id, song.libraryAddToken, song.libraryRemoveToken)
+                                    addLibraryTokens(
+                                        song.id,
+                                        song.libraryAddToken,
+                                        song.libraryRemoveToken
+                                    )
                                 }
                             }
                         } catch (e: Exception) {
@@ -211,7 +220,8 @@ class SyncUtils @Inject constructor(
 
             remotePlaylists.forEach { playlist ->
                 launch {
-                    var playlistEntity = localPlaylists.find { it.playlist.browseId == playlist.id }?.playlist
+                    var playlistEntity =
+                        localPlaylists.find { it.playlist.browseId == playlist.id }?.playlist
                     if (playlistEntity == null) {
                         playlistEntity = PlaylistEntity(
                             name = playlist.title,
@@ -219,7 +229,11 @@ class SyncUtils @Inject constructor(
                             thumbnailUrl = playlist.thumbnail,
                             isEditable = playlist.isEditable,
                             bookmarkedAt = LocalDateTime.now(),
-                            remoteSongCount = playlist.songCountText?.let { Regex("""\\d+""").find(it)?.value?.toIntOrNull() },
+                            remoteSongCount = playlist.songCountText?.let {
+                                Regex("""\\d+""").find(
+                                    it
+                                )?.value?.toIntOrNull()
+                            },
                             playEndpointParams = playlist.playEndpoint?.params,
                             shuffleEndpointParams = playlist.shuffleEndpoint?.params,
                             radioEndpointParams = playlist.radioEndpoint?.params
@@ -254,14 +268,14 @@ class SyncUtils @Inject constructor(
                 database.transaction {
                     // Clear existing playlist songs
                     database.clearPlaylist(playlistId)
-                    
+
                     // Insert songs first to ensure they exist
                     val songEntities = songs.onEach { song ->
                         if (runBlocking { database.song(song.id).firstOrNull() } == null) {
                             database.insert(song)
                         }
                     }
-                    
+
                     // Create playlist song maps
                     val playlistSongMaps = songEntities.mapIndexed { position, song ->
                         PlaylistSongMap(
@@ -271,7 +285,7 @@ class SyncUtils @Inject constructor(
                             setVideoId = song.setVideoId
                         )
                     }
-                    
+
                     // Insert all playlist song maps
                     playlistSongMaps.forEach { playlistSongMap ->
                         database.insert(playlistSongMap)
@@ -308,7 +322,12 @@ class SyncUtils @Inject constructor(
                 likedSongs.forEach { songWithArtists ->
                     try {
                         database.transaction {
-                            database.update(songWithArtists.song.copy(liked = false, likedDate = null))
+                            database.update(
+                                songWithArtists.song.copy(
+                                    liked = false,
+                                    likedDate = null
+                                )
+                            )
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

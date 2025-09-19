@@ -86,17 +86,18 @@ fun BackupAndRestore(
                 showChoosePlaylistDialogOnline = true
             }
         }
-    val importM3uLauncherOnline = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        val result = viewModel.loadM3UOnline(context, uri)
-        importedSongs.clear()
-        importedSongs.addAll(result)
+    val importM3uLauncherOnline =
+        rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            if (uri == null) return@rememberLauncherForActivityResult
+            val result = viewModel.loadM3UOnline(context, uri)
+            importedSongs.clear()
+            importedSongs.addAll(result)
 
 
-        if (importedSongs.isNotEmpty()) {
-            showChoosePlaylistDialogOnline = true
+            if (importedSongs.isNotEmpty()) {
+                showChoosePlaylistDialogOnline = true
+            }
         }
-    }
 
     Column(
         Modifier
@@ -131,7 +132,7 @@ fun BackupAndRestore(
             },
         )
         PreferenceEntry(
-            title = {Text(stringResource(R.string.import_online))},
+            title = { Text(stringResource(R.string.import_online)) },
             icon = { Icon(painterResource(R.drawable.playlist_add), null) },
             onClick = {
                 importM3uLauncherOnline.launch(arrayOf("audio/*"))

@@ -43,6 +43,7 @@ class CoilBitmapLoader(
                 is ErrorResult -> {
                     createBitmap(64, 64)
                 }
+
                 is SuccessResult -> {
                     try {
                         result.image.toBitmap()

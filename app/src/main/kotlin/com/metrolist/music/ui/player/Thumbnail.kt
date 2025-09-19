@@ -10,7 +10,6 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -29,15 +28,14 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,8 +53,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -66,20 +64,18 @@ import androidx.compose.ui.util.fastForEach
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import coil3.compose.AsyncImage
-import androidx.compose.material3.Icon
 import com.metrolist.music.LocalPlayerConnection
 import com.metrolist.music.R
+import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.PlayerBackgroundStyleKey
 import com.metrolist.music.constants.PlayerHorizontalPadding
 import com.metrolist.music.constants.SeekExtraSeconds
 import com.metrolist.music.constants.SwipeThumbnailKey
 import com.metrolist.music.constants.ThumbnailCornerRadius
-import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.utils.rememberEnumPreference
 import com.metrolist.music.utils.rememberPreference
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import kotlin.math.abs
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -103,23 +99,22 @@ fun Thumbnail(
     val hidePlayerThumbnail by rememberPreference(HidePlayerThumbnailKey, false)
     val canSkipPrevious by playerConnection.canSkipPrevious.collectAsState()
     val canSkipNext by playerConnection.canSkipNext.collectAsState()
-    
+
     // Player background style for consistent theming
     val playerBackground by rememberEnumPreference(
         key = PlayerBackgroundStyleKey,
         defaultValue = PlayerBackgroundStyle.DEFAULT
     )
-    
+
     val textBackgroundColor = when (playerBackground) {
         PlayerBackgroundStyle.DEFAULT -> MaterialTheme.colorScheme.onBackground
         PlayerBackgroundStyle.BLUR -> Color.White
         PlayerBackgroundStyle.GRADIENT -> Color.White
-        PlayerBackgroundStyle.STARRY -> Color.White
     }
-    
+
     // Grid state
     val thumbnailLazyGridState = rememberLazyGridState()
-    
+
     // Create a playlist using correct shuffle-aware logic
     val timeline = playerConnection.player.currentTimeline
     val currentIndex = playerConnection.player.currentMediaItemIndex
@@ -133,7 +128,9 @@ fun Thumbnail(
         if (previousIndex != C.INDEX_UNSET) {
             try {
                 playerConnection.player.getMediaItemAt(previousIndex)
-            } catch (e: Exception) { null }
+            } catch (e: Exception) {
+                null
+            }
         } else null
     } else null
 
@@ -146,13 +143,17 @@ fun Thumbnail(
         if (nextIndex != C.INDEX_UNSET) {
             try {
                 playerConnection.player.getMediaItemAt(nextIndex)
-            } catch (e: Exception) { null }
+            } catch (e: Exception) {
+                null
+            }
         } else null
     } else null
 
     val currentMediaItem = try {
         playerConnection.player.currentMediaItem
-    } catch (e: Exception) { null }
+    } catch (e: Exception) {
+        null
+    }
 
     val mediaItems = listOfNotNull(previousMediaMetadata, currentMediaItem, nextMediaMetadata)
     val currentMediaIndex = mediaItems.indexOf(currentMediaItem)
@@ -262,7 +263,7 @@ fun Thumbnail(
                         )
                     }
                 }
-                
+
                 // Thumbnail content
                 BoxWithConstraints(
                     contentAlignment = Alignment.Center,
@@ -280,12 +281,15 @@ fun Thumbnail(
                     ) {
                         items(
                             items = mediaItems,
-                            key = { item -> 
+                            key = { item ->
                                 // Use mediaId with stable fallback to avoid recomposition issues
                                 item.mediaId.ifEmpty { "unknown_${item.hashCode()}" }
                             }
                         ) { item ->
-                            val incrementalSeekSkipEnabled by rememberPreference(SeekExtraSeconds, defaultValue = false)
+                            val incrementalSeekSkipEnabled by rememberPreference(
+                                SeekExtraSeconds,
+                                defaultValue = false
+                            )
                             var skipMultiplier by remember { mutableIntStateOf(1) }
                             var lastTapTime by remember { mutableLongStateOf(0L) }
 
@@ -297,7 +301,8 @@ fun Thumbnail(
                                     .pointerInput(Unit) {
                                         detectTapGestures(
                                             onDoubleTap = { offset ->
-                                                val currentPosition = playerConnection.player.currentPosition
+                                                val currentPosition =
+                                                    playerConnection.player.currentPosition
                                                 val duration = playerConnection.player.duration
 
                                                 val now = System.currentTimeMillis()
@@ -314,15 +319,25 @@ fun Thumbnail(
                                                     (layoutDirection == LayoutDirection.Rtl && offset.x > size.width / 2)
                                                 ) {
                                                     playerConnection.player.seekTo(
-                                                        (currentPosition - skipAmount).coerceAtLeast(0)
+                                                        (currentPosition - skipAmount).coerceAtLeast(
+                                                            0
+                                                        )
                                                     )
                                                     seekDirection =
-                                                        context.getString(R.string.seek_backward_dynamic, skipAmount / 1000)
+                                                        context.getString(
+                                                            R.string.seek_backward_dynamic,
+                                                            skipAmount / 1000
+                                                        )
                                                 } else {
                                                     playerConnection.player.seekTo(
-                                                        (currentPosition + skipAmount).coerceAtMost(duration)
+                                                        (currentPosition + skipAmount).coerceAtMost(
+                                                            duration
+                                                        )
                                                     )
-                                                    seekDirection = context.getString(R.string.seek_forward_dynamic, skipAmount / 1000)
+                                                    seekDirection = context.getString(
+                                                        R.string.seek_forward_dynamic,
+                                                        skipAmount / 1000
+                                                    )
                                                 }
 
                                                 showSeekEffect = true
@@ -365,7 +380,10 @@ fun Thumbnail(
                                             modifier = Modifier
                                                 .fillMaxSize()
                                                 .graphicsLayer(
-                                                    renderEffect = BlurEffect(radiusX = 75f, radiusY = 75f),
+                                                    renderEffect = BlurEffect(
+                                                        radiusX = 75f,
+                                                        radiusY = 75f
+                                                    ),
                                                     alpha = 0.5f
                                                 )
                                         )

@@ -1,7 +1,6 @@
 package com.metrolist.music.ui.screens.settings
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -53,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.media3.common.Player.STATE_READY
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
@@ -79,7 +79,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -170,13 +169,13 @@ fun DiscordSettings(
         ) {
             Card(
                 colors =
-                CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ),
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.info),
@@ -195,9 +194,9 @@ fun DiscordSettings(
                         infoDismissed = true
                     },
                     modifier =
-                    Modifier
-                        .align(Alignment.End)
-                        .padding(16.dp),
+                        Modifier
+                            .align(Alignment.End)
+                            .padding(16.dp),
                 ) {
                     Text(stringResource(R.string.dismiss))
                 }
@@ -216,11 +215,11 @@ fun DiscordSettings(
                 )
             },
             description =
-            if (discordUsername.isNotEmpty()) {
-                "@$discordUsername"
-            } else {
-                null
-            },
+                if (discordUsername.isNotEmpty()) {
+                    "@$discordUsername"
+                } else {
+                    null
+                },
             icon = { Icon(painterResource(R.drawable.discord), null) },
             trailingContent = {
                 if (isLoggedIn) {
@@ -295,9 +294,9 @@ fun RichPresence(song: Song?, currentPlaybackTimeMillis: Long = 0L) {
         shape = MaterialTheme.shapes.medium,
         shadowElevation = 6.dp,
         modifier =
-        Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
+            Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -323,42 +322,42 @@ fun RichPresence(song: Song?, currentPlaybackTimeMillis: Long = 0L) {
                         model = song?.song?.thumbnailUrl,
                         contentDescription = null,
                         modifier =
-                        Modifier
-                            .size(96.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .align(Alignment.TopStart)
-                            .run {
-                                if (song == null) {
-                                    border(
-                                        2.dp,
-                                        MaterialTheme.colorScheme.onSurface,
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                } else {
-                                    this
-                                }
-                            },
+                            Modifier
+                                .size(96.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .align(Alignment.TopStart)
+                                .run {
+                                    if (song == null) {
+                                        border(
+                                            2.dp,
+                                            MaterialTheme.colorScheme.onSurface,
+                                            RoundedCornerShape(12.dp)
+                                        )
+                                    } else {
+                                        this
+                                    }
+                                },
                     )
 
                     song?.artists?.firstOrNull()?.thumbnailUrl?.let {
                         Box(
                             modifier =
-                            Modifier
-                                .border(
-                                    2.dp,
-                                    MaterialTheme.colorScheme.surfaceContainer,
-                                    CircleShape
-                                )
-                                .padding(2.dp)
-                                .align(Alignment.BottomEnd),
+                                Modifier
+                                    .border(
+                                        2.dp,
+                                        MaterialTheme.colorScheme.surfaceContainer,
+                                        CircleShape
+                                    )
+                                    .padding(2.dp)
+                                    .align(Alignment.BottomEnd),
                         ) {
                             AsyncImage(
                                 model = it,
                                 contentDescription = null,
                                 modifier =
-                                Modifier
-                                    .size(32.dp)
-                                    .clip(CircleShape),
+                                    Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape),
                             )
                         }
                     }
@@ -366,9 +365,9 @@ fun RichPresence(song: Song?, currentPlaybackTimeMillis: Long = 0L) {
 
                 Column(
                     modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(horizontal = 6.dp),
+                        Modifier
+                            .weight(1f)
+                            .padding(horizontal = 6.dp),
                 ) {
                     Text(
                         text = song?.song?.title ?: "Song Title",

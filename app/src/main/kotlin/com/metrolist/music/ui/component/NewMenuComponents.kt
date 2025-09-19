@@ -18,9 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,7 +47,7 @@ fun NewActionButton(
         animationSpec = tween(200),
         label = "background"
     )
-    
+
     val animatedContent by animateColorAsState(
         targetValue = if (enabled) contentColor else contentColor.copy(alpha = 0.5f),
         animationSpec = tween(200),
@@ -81,9 +78,9 @@ fun NewActionButton(
             ) {
                 icon()
             }
-            
+
             Spacer(modifier = Modifier.height(6.dp))
-            
+
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelMedium,
@@ -145,7 +142,7 @@ fun NewActionGrid(
     columns: Int = 3
 ) {
     val rows = actions.chunked(columns)
-    
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -165,7 +162,7 @@ fun NewActionGrid(
                         contentColor = if (action.contentColor != Color.Unspecified) action.contentColor else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                
+
                 // Fill remaining space if row is not full
                 repeat(columns - row.size) {
                     Spacer(modifier = Modifier.weight(1f))
@@ -199,10 +196,10 @@ fun NewMenuContent(
     ) {
         // Header
         headerContent?.invoke()
-        
+
         // Action Grid
         actionGrid?.invoke()
-        
+
         // Divider if both header and actions exist
         if (headerContent != null && actionGrid != null) {
             HorizontalDivider(
@@ -210,7 +207,7 @@ fun NewMenuContent(
                 color = MaterialTheme.colorScheme.outlineVariant
             )
         }
-        
+
         // Menu Items
         menuItems?.invoke()
     }
@@ -231,7 +228,7 @@ fun NewIconButton(
         animationSpec = tween(200),
         label = "background"
     )
-    
+
     val animatedContent by animateColorAsState(
         targetValue = if (enabled) contentColor else contentColor.copy(alpha = 0.5f),
         animationSpec = tween(200),

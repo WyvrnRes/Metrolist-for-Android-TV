@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -34,8 +34,8 @@ fun CustomThumbnailMenu(
     ) {
         item {
             ListItem(
-                headlineContent = { 
-                    Text(text = stringResource(R.string.choose_from_library)) 
+                headlineContent = {
+                    Text(text = stringResource(R.string.choose_from_library))
                 },
                 leadingContent = {
                     Icon(
@@ -51,8 +51,8 @@ fun CustomThumbnailMenu(
         }
         item {
             ListItem(
-                headlineContent = { 
-                    Text(text = stringResource(R.string.remove_custom_image)) 
+                headlineContent = {
+                    Text(text = stringResource(R.string.remove_custom_image))
                 },
                 leadingContent = {
                     Icon(

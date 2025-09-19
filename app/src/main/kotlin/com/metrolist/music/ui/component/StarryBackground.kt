@@ -8,7 +8,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -22,7 +21,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
 import kotlin.math.PI
-import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.random.Random
 
@@ -54,7 +52,7 @@ fun StarryBackground(
 ) {
     val density = LocalDensity.current
     val infiniteTransition = rememberInfiniteTransition(label = "starry_transition")
-    
+
     // Animation for twinkling effect
     val twinkleAnimation by infiniteTransition.animateFloat(
         initialValue = 0f,
@@ -136,7 +134,10 @@ fun StarryBackground(
                 )
             } else {
                 // Draw cross-shaped star
-                rotate(degrees = star.rotation + timeAnimation * 10f, pivot = Offset(starX, starY)) {
+                rotate(
+                    degrees = star.rotation + timeAnimation * 10f,
+                    pivot = Offset(starX, starY)
+                ) {
                     drawStar(
                         color = currentStarColor,
                         center = Offset(starX, starY),
@@ -204,12 +205,15 @@ private fun DrawScope.drawShootingStars(
         val starEndTime = starStartTime + shootingStar.duration
 
         if (currentTime >= starStartTime && currentTime <= starEndTime) {
-            val progress = ((currentTime - starStartTime).toFloat() / shootingStar.duration.toFloat())
-                .coerceIn(0f, 1f)
+            val progress =
+                ((currentTime - starStartTime).toFloat() / shootingStar.duration.toFloat())
+                    .coerceIn(0f, 1f)
 
             // Calculate current position
-            val currentX = shootingStar.startX + (shootingStar.endX - shootingStar.startX) * progress
-            val currentY = shootingStar.startY + (shootingStar.endY - shootingStar.startY) * progress
+            val currentX =
+                shootingStar.startX + (shootingStar.endX - shootingStar.startX) * progress
+            val currentY =
+                shootingStar.startY + (shootingStar.endY - shootingStar.startY) * progress
 
             val x = currentX * canvasSize.width
             val y = currentY * canvasSize.height
@@ -275,7 +279,7 @@ private fun DrawScope.drawStar(
 ) {
     val halfSize = size / 2f
     val quarterSize = size / 4f
-    
+
     // Draw vertical line
     drawLine(
         color = color,
@@ -283,7 +287,7 @@ private fun DrawScope.drawStar(
         end = Offset(center.x, center.y + halfSize),
         strokeWidth = 1f
     )
-    
+
     // Draw horizontal line
     drawLine(
         color = color,
@@ -291,7 +295,7 @@ private fun DrawScope.drawStar(
         end = Offset(center.x + halfSize, center.y),
         strokeWidth = 1f
     )
-    
+
     // Add small center dot for brightness
     drawCircle(
         color = color,

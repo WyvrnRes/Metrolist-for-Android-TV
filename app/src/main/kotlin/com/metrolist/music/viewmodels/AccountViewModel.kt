@@ -7,8 +7,8 @@ import com.metrolist.innertube.models.AlbumItem
 import com.metrolist.innertube.models.ArtistItem
 import com.metrolist.innertube.models.PlaylistItem
 import com.metrolist.innertube.utils.completed
-import com.metrolist.music.utils.reportException
 import com.metrolist.music.ui.utils.resize
+import com.metrolist.music.utils.reportException
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -23,7 +23,7 @@ class AccountViewModel @Inject constructor() : ViewModel() {
     val playlists = MutableStateFlow<List<PlaylistItem>?>(null)
     val albums = MutableStateFlow<List<AlbumItem>?>(null)
     val artists = MutableStateFlow<List<ArtistItem>?>(null)
-    
+
     // Selected content type for chips
     val selectedContentType = MutableStateFlow(AccountContentType.PLAYLISTS)
 
@@ -51,7 +51,7 @@ class AccountViewModel @Inject constructor() : ViewModel() {
             }
         }
     }
-    
+
     fun setSelectedContentType(contentType: AccountContentType) {
         selectedContentType.value = contentType
     }

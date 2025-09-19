@@ -2,7 +2,14 @@ package com.metrolist.music.utils
 
 import android.content.ContentValues
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
+import android.graphics.RectF
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -72,7 +79,8 @@ object ComposeToImage {
                     .build()
                 val result = imageLoader.execute(request)
                 coverArtBitmap = result.image?.toBitmap()
-            } catch (_: Exception) {}
+            } catch (_: Exception) {
+            }
         }
 
         val padding = 32f
@@ -105,11 +113,23 @@ object ComposeToImage {
         val textMaxWidth = cardSize - (padding * 2 + coverArtSize + 16f)
         val textStartX = padding + coverArtSize + 16f
 
-        val titleLayout = StaticLayout.Builder.obtain(songTitle, 0, songTitle.length, titlePaint, textMaxWidth.toInt())
+        val titleLayout = StaticLayout.Builder.obtain(
+            songTitle,
+            0,
+            songTitle.length,
+            titlePaint,
+            textMaxWidth.toInt()
+        )
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setMaxLines(1)
             .build()
-        val artistLayout = StaticLayout.Builder.obtain(artistName, 0, artistName.length, artistPaint, textMaxWidth.toInt())
+        val artistLayout = StaticLayout.Builder.obtain(
+            artistName,
+            0,
+            artistName.length,
+            artistPaint,
+            textMaxWidth.toInt()
+        )
             .setAlignment(Layout.Alignment.ALIGN_NORMAL)
             .setMaxLines(1)
             .build()
@@ -224,7 +244,10 @@ object ComposeToImage {
             val contentValues = ContentValues().apply {
                 put(MediaStore.MediaColumns.DISPLAY_NAME, "$fileName.png")
                 put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-                put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Metrolist")
+                put(
+                    MediaStore.MediaColumns.RELATIVE_PATH,
+                    Environment.DIRECTORY_PICTURES + "/Metrolist"
+                )
             }
             val uri = context.contentResolver.insert(
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI,

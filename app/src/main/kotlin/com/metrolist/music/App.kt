@@ -14,37 +14,54 @@ import coil3.disk.directory
 import coil3.request.CachePolicy
 import coil3.request.allowHardware
 import coil3.request.crossfade
-import com.metrolist.music.constants.*
-import com.metrolist.music.extensions.*
-import com.metrolist.music.utils.dataStore
-import com.metrolist.music.utils.get
-import com.metrolist.music.utils.reportException
 import com.metrolist.innertube.YouTube
 import com.metrolist.innertube.models.YouTubeLocale
 import com.metrolist.kugou.KuGou
+import com.metrolist.music.constants.AccountChannelHandleKey
+import com.metrolist.music.constants.AccountEmailKey
+import com.metrolist.music.constants.AccountNameKey
+import com.metrolist.music.constants.ContentCountryKey
+import com.metrolist.music.constants.ContentLanguageKey
+import com.metrolist.music.constants.CountryCodeToName
+import com.metrolist.music.constants.DataSyncIdKey
+import com.metrolist.music.constants.InnerTubeCookieKey
+import com.metrolist.music.constants.LanguageCodeToName
+import com.metrolist.music.constants.MaxImageCacheSizeKey
+import com.metrolist.music.constants.ProxyEnabledKey
+import com.metrolist.music.constants.ProxyPasswordKey
+import com.metrolist.music.constants.ProxyTypeKey
+import com.metrolist.music.constants.ProxyUrlKey
+import com.metrolist.music.constants.ProxyUsernameKey
+import com.metrolist.music.constants.SYSTEM_DEFAULT
+import com.metrolist.music.constants.UseLoginForBrowse
+import com.metrolist.music.constants.VisitorDataKey
+import com.metrolist.music.extensions.toEnum
+import com.metrolist.music.extensions.toInetSocketAddress
+import com.metrolist.music.utils.dataStore
+import com.metrolist.music.utils.get
+import com.metrolist.music.utils.reportException
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import okhttp3.Credentials
 import timber.log.Timber
 import java.net.Authenticator
 import java.net.PasswordAuthentication
 import java.net.Proxy
-import java.util.*
-import okhttp3.Credentials
+import java.util.Locale
 
 @HiltAndroidApp
 class App : Application(), SingletonImageLoader.Factory {
     // Create a proper application scope that will be cancelled when the app is destroyed
     private val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
-    
+
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCreate() {
         super.onCreate()
@@ -102,7 +119,8 @@ class App : Application(), SingletonImageLoader.Factory {
                         ?.takeIf { it != "null" } // Previously visitorData was sometimes saved as "null" due to a bug
                         ?: YouTube.visitorData().onFailure {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(this@App, "Failed to get visitorData.", LENGTH_SHORT).show()
+                                Toast.makeText(this@App, "Failed to get visitorData.", LENGTH_SHORT)
+                                    .show()
                             }
                             reportException(it)
                         }.getOrNull()?.also { newVisitorData ->
@@ -162,17 +180,17 @@ class App : Application(), SingletonImageLoader.Factory {
         }
 
         return ImageLoader.Builder(this)
-        .crossfade(true)
-        .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-        .memoryCachePolicy(CachePolicy.ENABLED)
-        .networkCachePolicy(CachePolicy.ENABLED)
-        .diskCache(
-            DiskCache.Builder()
-                .directory(cacheDir.resolve("coil"))
-                .maxSizeBytes((cacheSize ?: 512) * 1024 * 1024L)
-                .build()
-        )
-        .build()
+            .crossfade(true)
+            .allowHardware(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .networkCachePolicy(CachePolicy.ENABLED)
+            .diskCache(
+                DiskCache.Builder()
+                    .directory(cacheDir.resolve("coil"))
+                    .maxSizeBytes((cacheSize ?: 512) * 1024 * 1024L)
+                    .build()
+            )
+            .build()
     }
 
     companion object {

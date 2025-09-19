@@ -50,28 +50,29 @@ import com.metrolist.music.constants.DefaultOpenTabKey
 import com.metrolist.music.constants.DynamicThemeKey
 import com.metrolist.music.constants.GridItemSize
 import com.metrolist.music.constants.GridItemsSizeKey
+import com.metrolist.music.constants.HidePlayerThumbnailKey
 import com.metrolist.music.constants.LibraryFilter
 import com.metrolist.music.constants.LyricsClickKey
 import com.metrolist.music.constants.LyricsScrollKey
 import com.metrolist.music.constants.LyricsTextPositionKey
-import com.metrolist.music.constants.UseNewPlayerDesignKey
-import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
 import com.metrolist.music.constants.PlayerBackgroundStyle
 import com.metrolist.music.constants.PlayerBackgroundStyleKey
-import com.metrolist.music.constants.PureBlackKey
 import com.metrolist.music.constants.PlayerButtonsStyle
 import com.metrolist.music.constants.PlayerButtonsStyleKey
+import com.metrolist.music.constants.PureBlackKey
+import com.metrolist.music.constants.ShowCachedPlaylistKey
+import com.metrolist.music.constants.ShowDownloadedPlaylistKey
+import com.metrolist.music.constants.ShowLikedPlaylistKey
+import com.metrolist.music.constants.ShowTopPlaylistKey
 import com.metrolist.music.constants.SliderStyle
 import com.metrolist.music.constants.SliderStyleKey
 import com.metrolist.music.constants.SlimNavBarKey
-import com.metrolist.music.constants.ShowLikedPlaylistKey
-import com.metrolist.music.constants.ShowDownloadedPlaylistKey
-import com.metrolist.music.constants.ShowTopPlaylistKey
-import com.metrolist.music.constants.ShowCachedPlaylistKey
-import com.metrolist.music.constants.SwipeThumbnailKey
+import com.metrolist.music.constants.StarryBackgroundKey
 import com.metrolist.music.constants.SwipeSensitivityKey
+import com.metrolist.music.constants.SwipeThumbnailKey
 import com.metrolist.music.constants.SwipeToSongKey
-import com.metrolist.music.constants.HidePlayerThumbnailKey
+import com.metrolist.music.constants.UseNewMiniPlayerDesignKey
+import com.metrolist.music.constants.UseNewPlayerDesignKey
 import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.EnumListPreference
 import com.metrolist.music.ui.component.IconButton
@@ -118,6 +119,12 @@ fun AppearanceSettings(
             defaultValue = PlayerBackgroundStyle.DEFAULT,
         )
     val (pureBlack, onPureBlackChange) = rememberPreference(PureBlackKey, defaultValue = false)
+
+    val (useStarryBackground, onUseStarryBackgroundChange) = rememberPreference(
+        StarryBackgroundKey,
+        defaultValue = false
+    )
+
     val (defaultOpenTab, onDefaultOpenTabChange) = rememberEnumPreference(
         DefaultOpenTabKey,
         defaultValue = NavigationTab.HOME
@@ -131,7 +138,10 @@ fun AppearanceSettings(
         defaultValue = LyricsPosition.CENTER
     )
     val (lyricsClick, onLyricsClickChange) = rememberPreference(LyricsClickKey, defaultValue = true)
-    val (lyricsScroll, onLyricsScrollChange) = rememberPreference(LyricsScrollKey, defaultValue = true)
+    val (lyricsScroll, onLyricsScrollChange) = rememberPreference(
+        LyricsScrollKey,
+        defaultValue = true
+    )
 
     val (sliderStyle, onSliderStyleChange) = rememberEnumPreference(
         SliderStyleKey,
@@ -371,6 +381,13 @@ fun AppearanceSettings(
             )
         }
 
+        SwitchPreference(
+            title = { Text(stringResource(R.string.starry_night)) },
+            icon = { Icon(painterResource(R.drawable.moon_stars), null) },
+            checked = useStarryBackground,
+            onCheckedChange = onUseStarryBackgroundChange,
+        )
+
         PreferenceGroupTitle(
             title = stringResource(R.string.player),
         )
@@ -399,7 +416,6 @@ fun AppearanceSettings(
                     PlayerBackgroundStyle.DEFAULT -> stringResource(R.string.follow_theme)
                     PlayerBackgroundStyle.GRADIENT -> stringResource(R.string.gradient)
                     PlayerBackgroundStyle.BLUR -> stringResource(R.string.player_background_blur)
-                    PlayerBackgroundStyle.STARRY -> stringResource(R.string.player_background_starry)
                 }
             },
         )
@@ -448,38 +464,38 @@ fun AppearanceSettings(
 
         AnimatedVisibility(swipeThumbnail) {
             var showSensitivityDialog by rememberSaveable { mutableStateOf(false) }
-            
+
             if (showSensitivityDialog) {
                 var tempSensitivity by remember { mutableFloatStateOf(swipeSensitivity) }
-                
+
                 DefaultDialog(
-                    onDismiss = { 
+                    onDismiss = {
                         tempSensitivity = swipeSensitivity
-                        showSensitivityDialog = false 
+                        showSensitivityDialog = false
                     },
                     buttons = {
                         TextButton(
-                            onClick = { 
+                            onClick = {
                                 tempSensitivity = 0.73f
                             }
                         ) {
                             Text(stringResource(R.string.reset))
                         }
-                        
+
                         Spacer(modifier = Modifier.weight(1f))
-                        
+
                         TextButton(
-                            onClick = { 
+                            onClick = {
                                 tempSensitivity = swipeSensitivity
-                                showSensitivityDialog = false 
+                                showSensitivityDialog = false
                             }
                         ) {
                             Text(stringResource(android.R.string.cancel))
                         }
                         TextButton(
-                            onClick = { 
+                            onClick = {
                                 onSwipeSensitivityChange(tempSensitivity)
-                                showSensitivityDialog = false 
+                                showSensitivityDialog = false
                             }
                         ) {
                             Text(stringResource(android.R.string.ok))
@@ -495,13 +511,16 @@ fun AppearanceSettings(
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
-    
+
                         Text(
-                            text = stringResource(R.string.sensitivity_percentage, (tempSensitivity * 100).roundToInt()),
+                            text = stringResource(
+                                R.string.sensitivity_percentage,
+                                (tempSensitivity * 100).roundToInt()
+                            ),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
-    
+
                         Slider(
                             value = tempSensitivity,
                             onValueChange = { tempSensitivity = it },
@@ -511,10 +530,13 @@ fun AppearanceSettings(
                     }
                 }
             }
-            
+
             PreferenceEntry(
                 title = { Text(stringResource(R.string.swipe_sensitivity)) },
-                description = stringResource(R.string.sensitivity_percentage, (swipeSensitivity * 100).roundToInt()),
+                description = stringResource(
+                    R.string.sensitivity_percentage,
+                    (swipeSensitivity * 100).roundToInt()
+                ),
                 icon = { Icon(painterResource(R.drawable.tune), null) },
                 onClick = { showSensitivityDialog = true }
             )

@@ -5,7 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,6 +26,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import com.metrolist.innertube.YouTube
 import com.metrolist.innertube.utils.parseCookieString
 import com.metrolist.music.LocalDatabase
 import com.metrolist.music.R
@@ -34,12 +38,8 @@ import com.metrolist.music.ui.component.DefaultDialog
 import com.metrolist.music.ui.component.ListItem
 import com.metrolist.music.ui.component.PlaylistListItem
 import com.metrolist.music.utils.rememberPreference
-import com.metrolist.innertube.YouTube
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.material3.AlertDialog
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Checkbox
 import kotlinx.coroutines.withContext
 
 @Composable
@@ -128,7 +128,8 @@ fun AddToPlaylistDialog(
                     onClick = {
                         coroutineScope.launch {
                             val currentSongIds = withContext(Dispatchers.IO) {
-                                songIds ?: if (playlists.isNotEmpty()) onGetSong(playlists.first()) else null
+                                songIds
+                                    ?: if (playlists.isNotEmpty()) onGetSong(playlists.first()) else null
                             }
 
                             if (currentSongIds.isNullOrEmpty()) {
@@ -138,11 +139,13 @@ fun AddToPlaylistDialog(
                             songIds = currentSongIds
 
                             val (withDuplicates, duplicatesMap) = withContext(Dispatchers.IO) {
-                                val selectedPlaylists = playlists.filter { selectedPlaylistIds.contains(it.id) }
+                                val selectedPlaylists =
+                                    playlists.filter { selectedPlaylistIds.contains(it.id) }
                                 val tempDuplicatesMap = mutableMapOf<String, List<String>>()
 
                                 val (playlistsWithDups, playlistsWithoutDups) = selectedPlaylists.partition { playlist ->
-                                    val dups = database.playlistDuplicates(playlist.id, currentSongIds)
+                                    val dups =
+                                        database.playlistDuplicates(playlist.id, currentSongIds)
                                     if (dups.isNotEmpty()) {
                                         tempDuplicatesMap[playlist.id] = dups
                                         true
@@ -195,8 +198,10 @@ fun AddToPlaylistDialog(
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
                             playlistsWithDuplicates.forEach { playlist ->
-                                val duplicatesForThisPlaylist = duplicateSongsMap[playlist.id] ?: emptyList()
-                                val songsToAdd = songIds!!.filter { it !in duplicatesForThisPlaylist }
+                                val duplicatesForThisPlaylist =
+                                    duplicateSongsMap[playlist.id] ?: emptyList()
+                                val songsToAdd =
+                                    songIds!!.filter { it !in duplicatesForThisPlaylist }
                                 if (songsToAdd.isNotEmpty()) {
                                     database.addSongToPlaylist(playlist, songsToAdd)
                                 }

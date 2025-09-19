@@ -15,16 +15,16 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ListItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -406,7 +406,14 @@ fun YouTubePlaylistMenu(
                                         .orEmpty()
                                 }
                             }.let { songs ->
-                                playerConnection.playNext(songs.map { it.copy(thumbnail = it.thumbnail.resize(544,544)).toMediaItem() })
+                                playerConnection.playNext(songs.map {
+                                    it.copy(
+                                        thumbnail = it.thumbnail.resize(
+                                            544,
+                                            544
+                                        )
+                                    ).toMediaItem()
+                                })
                             }
                     }
                     onDismiss()
@@ -478,6 +485,7 @@ fun YouTubePlaylistMenu(
                             }
                         )
                     }
+
                     Download.STATE_QUEUED, Download.STATE_DOWNLOADING -> {
                         ListItem(
                             headlineContent = { Text(text = stringResource(R.string.downloading)) },
@@ -492,6 +500,7 @@ fun YouTubePlaylistMenu(
                             }
                         )
                     }
+
                     else -> {
                         ListItem(
                             headlineContent = { Text(text = stringResource(R.string.action_download)) },
@@ -503,10 +512,11 @@ fun YouTubePlaylistMenu(
                             },
                             modifier = Modifier.clickable {
                                 songs.forEach { song ->
-                                    val downloadRequest = DownloadRequest.Builder(song.id, song.id.toUri())
-                                        .setCustomCacheKey(song.id)
-                                        .setData(song.title.toByteArray())
-                                        .build()
+                                    val downloadRequest =
+                                        DownloadRequest.Builder(song.id, song.id.toUri())
+                                            .setCustomCacheKey(song.id)
+                                            .setData(song.title.toByteArray())
+                                            .build()
                                     DownloadService.sendAddDownload(
                                         context,
                                         ExoDownloadService::class.java,
